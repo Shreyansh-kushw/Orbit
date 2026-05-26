@@ -27,6 +27,7 @@ async def get_posts(db: Annotated[AsyncSession, Depends(get_db)]):
     posts = result.scalars().all()
     return posts
 
+
 @app.post(
     "",
     response_model=PostResponse,
@@ -41,14 +42,15 @@ async def create_post(
     new_post = models.Post(
         title=post.title,
         content=post.content,
-        user_id=1, # TEMPORARY
+        user_id=1,  # TEMPORARY
     )
 
     db.add(new_post)
     await db.commit()
     await db.refresh(new_post, attribute_names=["author"])
-    
+
     return new_post
+
 
 @app.get("/{post_id}", response_model=PostResponse)
 async def get_post(post_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
@@ -63,8 +65,9 @@ async def get_post(post_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
 
     if post:
         return post
-    
+
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+
 
 @app.patch("/{post_id}", response_model=PostResponse)
 async def update_post(
@@ -90,6 +93,7 @@ async def update_post(
     await db.commit()
     await db.refresh(post, attribute_names=["author"])
     return post
+
 
 @app.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(

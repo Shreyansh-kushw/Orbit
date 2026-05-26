@@ -17,10 +17,11 @@ from backend.app.utils.database import get_db, engine, Base
 import backend.app.utils.models as models
 from backend.app.api.routers import users, posts
 
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """This lifespan function responsible for creating the database tables."""
-    
+
     # startup
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -28,6 +29,8 @@ async def lifespan(_app: FastAPI):
 
     # shutdown
     await engine.dispose()
+
+
 app = FastAPI(lifespan=lifespan)
 
 # mounting the directories
@@ -38,4 +41,3 @@ app.mount("/media", StaticFiles(directory="./backend/media"), name="media")
 # adding the routers
 app.include_router(users.app, prefix="/api/users", tags=["users"])
 app.include_router(posts.app, prefix="/api/posts", tags=["posts"])
-

@@ -10,20 +10,30 @@ from sqlalchemy.orm import selectinload
 import backend.app.utils.models as models
 
 from backend.app.utils.database import get_db
-from backend.app.api.schemas.schema import PostResponse, UserCreate, UserPrivate, UserPublic, UserUpdate
+from backend.app.api.schemas.schema import (
+    PostResponse,
+    UserCreate,
+    UserPrivate,
+    UserPublic,
+    UserUpdate,
+)
 
 app = APIRouter()
 
 
 @app.post(
     "",
-    response_model=UserPrivate, 
+    response_model=UserPrivate,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_user(user: UserCreate, db:Annotated[AsyncSession, Depends(get_db)]):
+async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     """Creates a new user in the database"""
 
-    results = await db.execute(select(models.User).where(func.lower(models.User.username) == user.username.lower()))
+    results = await db.execute(
+        select(models.User).where(
+            func.lower(models.User.username) == user.username.lower()
+        )
+    )
     existing_user = results.scalars().first()
 
     if existing_user:
@@ -31,7 +41,6 @@ async def create_user(user: UserCreate, db:Annotated[AsyncSession, Depends(get_d
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already exists",
         )
-    
 
     result = await db.execute(
         select(models.User).where(func.lower(models.User.email) == user.email.lower()),
@@ -48,7 +57,7 @@ async def create_user(user: UserCreate, db:Annotated[AsyncSession, Depends(get_d
         username=user.username,
         email=user.email.lower(),
         name=user.name.capitalize(),
-        password_hash=user.password, # Temporary
+        password_hash=user.password,  # Temporary
     )
 
     db.add(new_user)
@@ -67,6 +76,7 @@ async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
     if user:
         return user
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
 
 @app.get("/{user_id}/posts", response_model=list[PostResponse])
 async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
@@ -87,6 +97,7 @@ async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_d
     )
     posts = result.scalars().all()
     return posts
+
 
 @app.patch("/{user_id}", response_model=UserPrivate)
 async def update_user(

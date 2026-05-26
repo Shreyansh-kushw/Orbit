@@ -26,14 +26,11 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-# creating the base class 
+# creating the base class
 class Base(DeclarativeBase): ...
 
 
 async def get_db():
     """Function to create and yield database session."""
-    async with (
-        AsyncSessionLocal() as session
-    ):
+    async with AsyncSessionLocal() as session:
         yield session
-
