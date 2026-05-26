@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { 
-  ThumbsUp, 
-  ThumbsDown, 
-  MessageCircle, 
-  UserPlus, 
+import {
+  ThumbsUp,
+  ThumbsDown,
+  MessageCircle,
+  UserPlus,
   Clock,
   ChevronRight
 } from 'lucide-react'
@@ -21,51 +21,51 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, showFullContent = false }: PostCardProps) {
-  const [isLiked, setIsLiked] = useState(post.isLiked || false)
-  const [isDisliked, setIsDisliked] = useState(post.isDisliked || false)
-  const [likes, setLikes] = useState(post.likes)
-  const [dislikes, setDislikes] = useState(post.dislikes)
-  const [isFollowing, setIsFollowing] = useState(post.author.isFollowing || false)
+  // const [isLiked, setIsLiked] = useState(post.isLiked || false)
+  // const [isDisliked, setIsDisliked] = useState(post.isDisliked || false)
+  // const [likes, setLikes] = useState(post.likes)
+  // const [dislikes, setDislikes] = useState(post.dislikes)
+  // const [isFollowing, setIsFollowing] = useState(post.author.isFollowing || false)
 
   const MAX_PREVIEW_LENGTH = 400
   const shouldTruncate = !showFullContent && post.content.length > MAX_PREVIEW_LENGTH
-  const displayContent = shouldTruncate 
-    ? post.content.slice(0, MAX_PREVIEW_LENGTH) + '...' 
+  const displayContent = shouldTruncate
+    ? post.content.slice(0, MAX_PREVIEW_LENGTH) + '...'
     : post.content
 
-  const handleLike = () => {
-    if (isLiked) {
-      setIsLiked(false)
-      setLikes(likes - 1)
-    } else {
-      setIsLiked(true)
-      setLikes(likes + 1)
-      if (isDisliked) {
-        setIsDisliked(false)
-        setDislikes(dislikes - 1)
-      }
-    }
-  }
+  // const handleLike = () => {
+  //   if (isLiked) {
+  //     setIsLiked(false)
+  //     setLikes(likes - 1)
+  //   } else {
+  //     setIsLiked(true)
+  //     setLikes(likes + 1)
+  //     if (isDisliked) {
+  //       setIsDisliked(false)
+  //       setDislikes(dislikes - 1)
+  //     }
+  //   }
+  // }
 
-  const handleDislike = () => {
-    if (isDisliked) {
-      setIsDisliked(false)
-      setDislikes(dislikes - 1)
-    } else {
-      setIsDisliked(true)
-      setDislikes(dislikes + 1)
-      if (isLiked) {
-        setIsLiked(false)
-        setLikes(likes - 1)
-      }
-    }
-  }
+  // const handleDislike = () => {
+  //   if (isDisliked) {
+  //     setIsDisliked(false)
+  //     setDislikes(dislikes - 1)
+  //   } else {
+  //     setIsDisliked(true)
+  //     setDislikes(dislikes + 1)
+  //     if (isLiked) {
+  //       setIsLiked(false)
+  //       setLikes(likes - 1)
+  //     }
+  //   }
+  // }
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     const now = new Date()
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
-    
+
     if (diffInHours < 1) return 'Just now'
     if (diffInHours < 24) return `${diffInHours}h ago`
     if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`
@@ -79,12 +79,15 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
         <div className="flex items-center gap-3">
           <Link href={`/profile/${post.author.username}`}>
             <Avatar className="w-12 h-12 ring-2 ring-transparent group-hover:ring-primary/30 transition-all">
-              <AvatarImage src={post.author.avatar} alt={post.author.displayName} />
-              <AvatarFallback>{post.author.displayName[0]}</AvatarFallback>
+              {/* <script>console.log(post.author.avatar)</script> */}
+              <AvatarImage src="/placeholder-user.jpg" alt={post.author.displayName} />
+              <AvatarFallback delayMs={600}>
+                {post.author.displayName}
+              </AvatarFallback>
             </Avatar>
           </Link>
           <div>
-            <Link 
+            <Link
               href={`/profile/${post.author.username}`}
               className="font-medium text-foreground hover:text-primary transition-colors"
             >
@@ -100,7 +103,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
             </div>
           </div>
         </div>
-        <Button
+        {/* <Button
           variant="outline"
           size="sm"
           onClick={() => setIsFollowing(!isFollowing)}
@@ -113,7 +116,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
         >
           <UserPlus className="w-3 h-3 mr-1" />
           {isFollowing ? 'Following' : 'Follow'}
-        </Button>
+        </Button> */}
       </div>
 
       {/* Content */}
@@ -132,7 +135,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
       </Link>
 
       {/* Actions */}
-      <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border/50">
+      {/* <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border/50">
         <button
           onClick={handleLike}
           className={cn(
@@ -166,7 +169,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
         >
           View Profile
         </Link>
-      </div>
+      </div> */}
     </article>
   )
 }

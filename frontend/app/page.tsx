@@ -1,9 +1,23 @@
 import { Navbar } from '@/components/orbit/navbar'
 import { Sidebar } from '@/components/orbit/sidebar'
 import { PostCard } from '@/components/orbit/post-card'
-import { mockPosts, currentUser } from '@/lib/mock-data'
+import { getPosts } from '@/lib/api'
+import { User, Post } from '@/lib/schemas'
+import { mapPost } from '@/lib/utils'
+import { PostApiResponse } from '@/lib/api'
 
-export default function HomePage() {
+const currentUser: User = {
+  id: 1,
+  username: 'orbituser',
+  displayName: 'Orbit User',
+  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=orbituser',
+}
+
+export default async function HomePage() {
+  
+  const rawPosts: PostApiResponse[] = await getPosts();
+  const posts = rawPosts.map(mapPost)
+  
   return (
     <div className="min-h-screen bg-background">
       <Navbar 
@@ -35,7 +49,7 @@ export default function HomePage() {
             </div>
 
             {/* Posts */}
-            {mockPosts.map((post) => (
+            {posts.map((post: any) => (
               <PostCard key={post.id} post={post} />
             ))}
           </div>
