@@ -47,6 +47,7 @@ async def create_user(user: UserCreate, db:Annotated[AsyncSession, Depends(get_d
     new_user = models.User(
         username=user.username,
         email=user.email.lower(),
+        name=user.name.capitalize(),
         password_hash=user.password, # Temporary
     )
 
@@ -137,6 +138,8 @@ async def update_user(
         user.username = user_update.username
     if user_update.email is not None:
         user.email = user_update.email.lower()
+    if user_update.name is not None:
+        user.name = user_update.name.capitalize()
     if user_update.image_file is not None:
         user.image_file = user_update.image_file
 
