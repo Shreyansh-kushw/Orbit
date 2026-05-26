@@ -1,4 +1,4 @@
-"""Router for user dealing with various user related functionalities."""
+"""Router for userS, dealing with various user related functionalities."""
 
 from typing import Annotated
 

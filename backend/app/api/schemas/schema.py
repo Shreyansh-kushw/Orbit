@@ -38,7 +38,7 @@ class UserPublic(BaseModel):
     image_file: str | None
     image_path: str
 
-class UserPrivate(UserBase):
+class UserPrivate(UserPublic):
     """Class for the user himself when requesting the profile"""
 
     email : EmailStr
@@ -52,7 +52,7 @@ class PostBase(BaseModel):
     title: str = Field(min_length=1, max_length=100)
     content: str = Field(min_length=1)
 
-class PostCreate(BaseModel):
+class PostCreate(PostBase):
     """Post class for creation of new posts."""
     
     ...
