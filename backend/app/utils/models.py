@@ -1,3 +1,5 @@
+"""Contains the model schemas for database fields."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime

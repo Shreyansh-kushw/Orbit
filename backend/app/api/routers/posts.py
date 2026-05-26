@@ -1,0 +1,1 @@
+"""Router for posts dealing with various post related functionalities."""

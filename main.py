@@ -8,7 +8,6 @@ from fastapi.exception_handlers import (
 )
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -16,6 +15,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.app.utils.database import get_db, engine, Base
 import backend.app.utils.models as models
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """This lifespan function responsible for creating the database tables."""
