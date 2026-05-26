@@ -15,7 +15,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.app.utils.database import get_db, engine, Base
 import backend.app.utils.models as models
-
+from backend.app.api.routers import users, posts
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -34,4 +34,8 @@ app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="./frontend/public"), name="static")
 app.mount("/media", StaticFiles(directory="./backend/media"), name="media")
 
+
+# adding the routers
+app.include_router(users.app, prefix="/api/users", tags=["users"])
+app.include_router(posts.app, prefix="/api/posts", tags=["posts"])
 
