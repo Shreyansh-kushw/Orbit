@@ -59,7 +59,6 @@ class User(Base):
             f"{Path(Path(APP_DIR).parent).parent}/frontend/public/placeholder-user.jpg"
         )
     
-    print(image_path)
 
 
 class Post(Base):
