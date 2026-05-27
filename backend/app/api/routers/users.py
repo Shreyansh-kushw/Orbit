@@ -13,7 +13,7 @@ from backend.app.utils.auth.config import settings
 import backend.app.utils.db.models as models
 
 from backend.app.utils.db import get_db
-from backend.app.api.schemas.schema import (
+from backend.app.api.schemas import (
     PostResponse,
     UserCreate,
     UserPrivate,

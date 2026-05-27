@@ -11,7 +11,7 @@ import backend.app.utils.db.models as models
 from backend.app.utils.auth import CurrentUser
 
 from backend.app.utils.db import get_db
-from backend.app.api.schemas.schema import PostCreate, PostResponse, PostUpdate
+from backend.app.api.schemas import PostCreate, PostResponse, PostUpdate
 
 
 app = APIRouter()
