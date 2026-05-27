@@ -1,6 +1,4 @@
-'use client'
-
-import Cookies from 'js-cookie';
+import { cookies } from 'next/headers'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
@@ -17,14 +15,15 @@ export async function getCurrentUser() {
         return fetchPromise;
     }
 
-    const token: string | undefined = Cookies.get('access_token');
+    const cookieStore = await cookies()
+    const token = cookieStore.get('access_token')?.value
     if (!token) {
         return null;
     }
 
     fetchPromise = (async () => {
         try {
-            const response = await fetch("/api/users/me", {
+            const response = await fetch(`${API_URL}/api/users/me`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

@@ -3,30 +3,25 @@ import { Sidebar } from '@/components/orbit/sidebar'
 import { PostCard } from '@/components/orbit/post-card'
 import { getPosts } from '@/lib/api'
 import { User, Post } from '@/lib/schemas'
-import { mapPost } from '@/lib/utils'
+import { mapPost, mapUser } from '@/lib/utils'
 import { PostApiResponse } from '@/lib/api'
+import { getCurrentUser } from '@/lib/auth'
 
-const currentUser: User = { // TEMPORARY
-  id: 1,
-  username: 'orbituser',
-  displayName: 'Orbit User',
-  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=orbituser',
-}
 
 export default async function HomePage() {
   
   const rawPosts: PostApiResponse[] = await getPosts();
   const posts = rawPosts.map(mapPost)
-  
+  var Authenticated: boolean = false;
+
+  const rawUser = await getCurrentUser()
+  const user = mapUser(rawUser)
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar 
-        isAuthenticated={true} 
-        user={{
-          username: currentUser.username,
-          displayName: currentUser.displayName,
-          avatar: currentUser.avatar,
-        }}
+        isAuthenticated={!!user} 
+        user={user || undefined}
       />
       
       <main className="max-w-7xl mx-auto px-4 py-6">

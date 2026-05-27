@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+import Cookies from 'js-cookie';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 const EXPIRE_MINS: number = parseInt(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || "60", 10)
@@ -111,22 +112,21 @@ function AuthPageContent() {
         if (response.ok) {
           setIsLoading(false)
 
-
           const data = await response.json()
           const expiry = new Date()
           expiry.setTime(expiry.getTime() + (EXPIRE_MINS * 60 * 1000))
-          document.cookie = `access_token=${data.access_token}; expires=`
-          localStorage.setItem('access_token', data.access_token)
+          
+          Cookies.set(`access_token`, data.access_token, { expires : expiry, path : '/'})
           setMessage(`Login Successful.`)
-
           window.location.href = "/"
-
           return
         }
         else {
+          setIsLoading(false)
           const errorResponse = await response.json()
           throw new Error(`Error: ${response.status}: ${JSON.stringify(errorResponse.detail)}`)
         }
+        
 
       }
       catch (error: unknown) {
