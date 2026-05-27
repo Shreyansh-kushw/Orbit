@@ -22,6 +22,19 @@ export async function getPostsByID(post_id: string): Promise<PostApiResponse>{
     return response.json()
 }
 
+export async function getCurrentUser(){
+    const response = await fetch(`${API_URL}/api/users/me`)
+
+    if (response.ok){
+        const result = await response.json()
+        return result
+    }
+    else{
+        return null
+    }
+
+}
+
 export interface PostApiResponse {
 
     id: number

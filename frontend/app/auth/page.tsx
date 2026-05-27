@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Github, Chrome } from 'lucide-react'
@@ -14,6 +14,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL
 function AuthPageContent() {
   const searchParams = useSearchParams()
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'login'
+  const msg = searchParams.get('message')
 
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode)
   const [showPassword, setShowPassword] = useState(false)
@@ -27,7 +28,13 @@ function AuthPageContent() {
     confirmPassword: '',
   })
   const [exception, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (msg) {
+      setMessage(msg)
+    }
+  }, [msg])
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isLoading) {
@@ -46,7 +53,7 @@ function AuthPageContent() {
         setError("Password should be atleast 8 characters long.")
         return
       }
-      try{
+      try {
         const response = await fetch(`${API_URL}/api/users`,
           {
             method: 'POST',
@@ -69,12 +76,16 @@ function AuthPageContent() {
           const errorResponse = await response.json()
           throw new Error(`Error: ${response.status}: ${JSON.stringify(errorResponse.detail)}`)
         }
+        else {
+          const msg = `Sign up successfull, kindly login.`
+          window.location.href = `/auth?mode=login&message=${encodeURIComponent(msg)}`
+        }
       }
       catch (error: unknown) {
-        if (error instanceof Error){
+        if (error instanceof Error) {
           setError(error.message)
         }
-        else{
+        else {
           setError(`An unexpected error occured: ${error}`)
         }
         return
@@ -88,7 +99,7 @@ function AuthPageContent() {
 
     // setIsLoading(false)
     // Redirect to home on success
-    window.location.href = '/'
+
   }
 
   const toggleMode = () => {
@@ -298,6 +309,11 @@ function AuthPageContent() {
               {exception && (
                 <p className="text-red-500 text-sm">
                   {exception}
+                </p>
+              )}
+              {message && (
+                <p className="text-green-500 text-sm">
+                  {message}
                 </p>
               )}
               {/* Submit Button */}
