@@ -9,10 +9,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+
 function AuthPageContent() {
   const searchParams = useSearchParams()
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'login'
-  
+
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -24,14 +26,67 @@ function AuthPageContent() {
     password: '',
     confirmPassword: '',
   })
+  const [exception, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // setIsLoading(true
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    if (isLoading) {
+      return
+    }
 
-    setIsLoading(false)
+    // Sign up validation
+    if (mode == "signup") {
+      setIsLoading(true)
+      if (formData.password != formData.confirmPassword) {
+        setError("Both password do not match")
+        return
+      }
+
+      if (formData.password.length < 8) {
+        setError("Password should be atleast 8 characters long.")
+        return
+      }
+      try{
+        const response = await fetch(`${API_URL}/api/users`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(
+              {
+                email: formData.email,
+                username: formData.username,
+                name: "John Doe",
+                password: formData.password
+              }
+            )
+          }
+        );
+
+        setIsLoading(false)
+        if (!response.ok) {
+          const errorResponse = await response.json()
+          throw new Error(`Error: ${response.status}: ${JSON.stringify(errorResponse.detail)}`)
+        }
+      }
+      catch (error: unknown) {
+        if (error instanceof Error){
+          setError(error.message)
+        }
+        else{
+          setError(`An unexpected error occured: ${error}`)
+        }
+        return
+      }
+
+
+    }
+
+    // Simulate API call
+    // await new Promise(resolve => setTimeout(resolve, 1500))
+
+    // setIsLoading(false)
     // Redirect to home on success
     window.location.href = '/'
   }
@@ -51,7 +106,7 @@ function AuthPageContent() {
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/30 rounded-full blur-3xl animate-pulse" />
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/30 rounded-full blur-3xl animate-pulse delay-1000" />
         </div>
-        
+
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
           <Link href="/" className="flex items-center gap-3 mb-12">
@@ -60,7 +115,7 @@ function AuthPageContent() {
             </div>
             <span className="text-3xl font-bold text-foreground">ORBIT</span>
           </Link>
-          
+
           <h1 className="text-4xl xl:text-5xl font-bold text-foreground mb-6 text-balance">
             Join the conversation that matters
           </h1>
@@ -103,10 +158,11 @@ function AuthPageContent() {
               onClick={() => setMode('login')}
               className={cn(
                 "flex-1 py-3 rounded-lg text-sm font-medium transition-all",
-                mode === 'login' 
-                  ? "bg-primary text-primary-foreground" 
+                mode === 'login'
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground"
               )}
+              style={{ cursor: 'pointer' }}
             >
               Login
             </button>
@@ -114,10 +170,11 @@ function AuthPageContent() {
               onClick={() => setMode('signup')}
               className={cn(
                 "flex-1 py-3 rounded-lg text-sm font-medium transition-all",
-                mode === 'signup' 
-                  ? "bg-primary text-primary-foreground" 
+                mode === 'signup'
+                  ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground"
               )}
+              style={{ cursor: 'pointer' }}
             >
               Sign Up
             </button>
@@ -130,8 +187,8 @@ function AuthPageContent() {
                 {mode === 'login' ? 'Welcome back' : 'Create your account'}
               </h2>
               <p className="text-muted-foreground mt-1">
-                {mode === 'login' 
-                  ? 'Enter your credentials to access your account' 
+                {mode === 'login'
+                  ? 'Enter your credentials to access your account'
                   : 'Join ORBIT and start exploring'}
               </p>
             </div>
@@ -163,7 +220,7 @@ function AuthPageContent() {
                     <Input
                       id="username"
                       type="text"
-                      placeholder="yourname"
+                      placeholder="Your Name"
                       value={formData.username}
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                       className="pl-10 bg-secondary/30 border-border/50 focus:border-primary/50"
@@ -191,6 +248,7 @@ function AuthPageContent() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    style={{ cursor: 'pointer' }}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -216,6 +274,7 @@ function AuthPageContent() {
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      style={{ cursor: 'pointer' }}
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -226,20 +285,27 @@ function AuthPageContent() {
               {/* Forgot Password (Login only) */}
               {mode === 'login' && (
                 <div className="flex justify-end">
-                  <Link 
-                    href="/auth/forgot-password" 
+                  <Link
+                    href="/auth/forgot-password"
                     className="text-sm text-primary hover:underline"
+                    style={{ cursor: 'pointer' }}
                   >
                     Forgot password?
                   </Link>
                 </div>
               )}
-
+              {/* Error label */}
+              {exception && (
+                <p className="text-red-500 text-sm">
+                  {exception}
+                </p>
+              )}
               {/* Submit Button */}
               <Button
                 type="submit"
                 className="w-full bg-primary hover:bg-primary/90 glow-primary"
                 disabled={isLoading}
+                style={{ cursor: 'pointer' }}
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">
@@ -283,6 +349,7 @@ function AuthPageContent() {
               <button
                 onClick={toggleMode}
                 className="text-primary hover:underline font-medium"
+                style={{ cursor: 'pointer' }}
               >
                 {mode === 'login' ? 'Sign up' : 'Sign in'}
               </button>
