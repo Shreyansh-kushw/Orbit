@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { 
-  ThumbsUp, 
-  ThumbsDown, 
-  Share2, 
-  Clock, 
+import {
+  ThumbsUp,
+  ThumbsDown,
+  Share2,
+  Clock,
   UserPlus,
   ArrowLeft,
   Bookmark,
@@ -19,54 +19,77 @@ import { CommentSection } from '@/components/orbit/comment-section'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { mockPosts, mockComments, currentUser } from '@/lib/mock-data'
+import { getPostsByID, PostApiResponse } from '@/lib/api'
+import { mapPost } from '@/lib/utils'
+import { Post, User } from '@/lib/schemas'
+
+const currentUser: User = { // TEMPORARY
+  id: 1,
+  username: 'orbituser',
+  displayName: 'Orbit User',
+  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=orbituser',
+}
 
 export default function PostPage() {
+
   const params = useParams()
   const postId = params.id as string
-  
-  const post = mockPosts.find(p => p.id === postId) || mockPosts[0]
-  
-  const [isLiked, setIsLiked] = useState(false)
-  const [isDisliked, setIsDisliked] = useState(false)
-  const [likes, setLikes] = useState(post.likes)
-  const [dislikes, setDislikes] = useState(post.dislikes)
-  const [isFollowing, setIsFollowing] = useState(false)
-  const [isSaved, setIsSaved] = useState(false)
 
-  const handleLike = () => {
-    if (isLiked) {
-      setIsLiked(false)
-      setLikes(likes - 1)
-    } else {
-      setIsLiked(true)
-      setLikes(likes + 1)
-      if (isDisliked) {
-        setIsDisliked(false)
-        setDislikes(dislikes - 1)
-      }
+  const [rawPost, setPost] = useState<PostApiResponse | null>(null)
+
+  useEffect(() => {
+    async function loadPost() {
+      const data: PostApiResponse = await getPostsByID(postId)
+      setPost(data)
     }
+    loadPost()
+  }, [postId])
+
+  if (!rawPost){
+    return
   }
 
-  const handleDislike = () => {
-    if (isDisliked) {
-      setIsDisliked(false)
-      setDislikes(dislikes - 1)
-    } else {
-      setIsDisliked(true)
-      setDislikes(dislikes + 1)
-      if (isLiked) {
-        setIsLiked(false)
-        setLikes(likes - 1)
-      }
-    }
-  }
+  const post: Post = mapPost(rawPost);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { 
-      month: 'long', 
-      day: 'numeric', 
+  // const [isLiked, setIsLiked] = useState(false)
+  // const [isDisliked, setIsDisliked] = useState(false)
+  // const [likes, setLikes] = useState(post.likes)
+  // const [dislikes, setDislikes] = useState(post.dislikes)
+  // const [isFollowing, setIsFollowing] = useState(false)
+  // const [isSaved, setIsSaved] = useState(false)
+
+  // const handleLike = () => {
+  //   if (isLiked) {
+  //     setIsLiked(false)
+  //     setLikes(likes - 1)
+  //   } else {
+  //     setIsLiked(true)
+  //     setLikes(likes + 1)
+  //     if (isDisliked) {
+  //       setIsDisliked(false)
+  //       setDislikes(dislikes - 1)
+  //     }
+  //   }
+  // }
+
+  // const handleDislike = () => {
+  //   if (isDisliked) {
+  //     setIsDisliked(false)
+  //     setDislikes(dislikes - 1)
+  //   } else {
+  //     setIsDisliked(true)
+  //     setDislikes(dislikes + 1)
+  //     if (isLiked) {
+  //       setIsLiked(false)
+  //       setLikes(likes - 1)
+  //     }
+  //   }
+  // }
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -81,21 +104,21 @@ export default function PostPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar 
-        isAuthenticated={true} 
+      <Navbar
+        isAuthenticated={true}
         user={{
           username: currentUser.username,
           displayName: currentUser.displayName,
           avatar: currentUser.avatar,
         }}
       />
-      
+
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-6">
           {/* Main Content */}
           <div className="flex-1 space-y-6">
             {/* Back Button */}
-            <Link 
+            <Link
               href="/"
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
             >
@@ -115,7 +138,7 @@ export default function PostPage() {
                     </Avatar>
                   </Link>
                   <div>
-                    <Link 
+                    <Link
                       href={`/profile/${post.author.username}`}
                       className="font-semibold text-lg text-foreground hover:text-primary transition-colors"
                     >
@@ -124,11 +147,11 @@ export default function PostPage() {
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <span>@{post.author.username}</span>
                       <span>·</span>
-                      <span>{formatNumber(post.author.followers)} followers</span>
+                      {/* <span>{formatNumber(post.author.followers)} followers</span> */}
                     </div>
                   </div>
                 </div>
-                <Button
+                {/* <Button
                   variant="outline"
                   onClick={() => setIsFollowing(!isFollowing)}
                   className={cn(
@@ -140,7 +163,7 @@ export default function PostPage() {
                 >
                   <UserPlus className="w-4 h-4 mr-2" />
                   {isFollowing ? 'Following' : 'Follow'}
-                </Button>
+                </Button> */}
               </div>
 
               {/* Post Title */}
@@ -164,7 +187,7 @@ export default function PostPage() {
               </div>
 
               {/* Post Actions */}
-              <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/50">
+              {/* <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/50">
                 <div className="flex items-center gap-4">
                   <button
                     onClick={handleLike}
@@ -210,11 +233,11 @@ export default function PostPage() {
                     Report
                   </Button>
                 </div>
-              </div>
+              </div> */}
             </article>
 
             {/* Comments Section */}
-            <CommentSection comments={mockComments} />
+            {/* <CommentSection comments={mockComments} /> */}
           </div>
 
           {/* Right Sidebar */}

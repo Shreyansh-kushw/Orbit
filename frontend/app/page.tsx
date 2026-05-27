@@ -6,7 +6,7 @@ import { User, Post } from '@/lib/schemas'
 import { mapPost } from '@/lib/utils'
 import { PostApiResponse } from '@/lib/api'
 
-const currentUser: User = {
+const currentUser: User = { // TEMPORARY
   id: 1,
   username: 'orbituser',
   displayName: 'Orbit User',

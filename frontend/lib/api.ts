@@ -12,6 +12,16 @@ export async function getPosts() {
     return response.json()
 }
 
+export async function getPostsByID(post_id: string): Promise<PostApiResponse>{
+    const response = await fetch(`${API_URL}/api/posts/${post_id}`)
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch posts")
+    }
+
+    return response.json()
+}
+
 export interface PostApiResponse {
 
     id: number

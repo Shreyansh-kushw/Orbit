@@ -17,6 +17,7 @@ from backend.app.utils.database import get_db, engine, Base
 import backend.app.utils.models as models
 from backend.app.api.routers import users, posts
 
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -32,6 +33,14 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # mounting the directories
 app.mount("/static", StaticFiles(directory="./frontend/public"), name="static")

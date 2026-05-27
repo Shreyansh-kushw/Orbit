@@ -80,9 +80,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
           <Link href={`/profile/${post.author.username}`}>
             <Avatar className="w-12 h-12 ring-2 ring-transparent group-hover:ring-primary/30 transition-all">
               <AvatarImage src="/placeholder-user.jpg" alt={post.author.displayName} />
-              <AvatarFallback delayMs={600}>
-                {post.author.displayName}
-              </AvatarFallback>
+              <AvatarFallback>{post.author.displayName[0]}</AvatarFallback>
             </Avatar>
           </Link>
           <div>

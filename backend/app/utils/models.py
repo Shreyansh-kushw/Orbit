@@ -56,7 +56,7 @@ class User(Base):
             return f"{Path(APP_DIR).parent}/media/profile_pics/{self.image_file}"
 
         return (
-            f"{Path(Path(APP_DIR).parent).parent}/frontend/public/placeholder-user.jpg"
+            "/placeholder-user.jpg"
         )
     
 
