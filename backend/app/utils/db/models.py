@@ -8,7 +8,7 @@ from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pathlib import Path
 
-from backend.app.utils.database import Base, APP_DIR
+from backend.app.utils.db import Base, APP_DIR
 
 
 class User(Base):

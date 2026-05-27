@@ -13,8 +13,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from backend.app.utils.database import get_db, engine, Base
-import backend.app.utils.models as models
+from backend.app.utils.db import get_db, engine, Base
+import backend.app.utils.db.models as models
 from backend.app.api.routers import users, posts
 
 from fastapi.middleware.cors import CORSMiddleware
