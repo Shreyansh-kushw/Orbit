@@ -6,6 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from datetime import timedelta
+
+from backend.app.utils.auth.config import settings
 
 import backend.app.utils.db.models as models
 
@@ -16,7 +19,16 @@ from backend.app.api.schemas.schema import (
     UserPrivate,
     UserPublic,
     UserUpdate,
+    Token,
 )
+
+from backend.app.utils.auth import (
+    CurrentUser,
+    create_access_token,
+    hash_password,
+    verify_password,
+)
+from fastapi.security import OAuth2PasswordRequestForm
 
 app = APIRouter()
 
@@ -57,7 +69,7 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
         username=user.username,
         email=user.email.lower(),
         name=user.name.capitalize(),
-        password_hash=user.password,  # Temporary
+        password_hash=hash_password(user.password),  
     )
 
     db.add(new_user)
@@ -65,6 +77,42 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
     await db.refresh(new_user)
     return new_user
 
+@app.post("/token", response_model=Token)
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    # Look up user by email (case-insensitive)
+    # Note: OAuth2PasswordRequestForm uses "username" field, but we treat it as email
+    result = await db.execute(
+        select(models.User).where(
+            func.lower(models.User.email) == form_data.username.lower(),
+        ),
+    )
+    user = result.scalars().first()
+
+    # Verify user exists and password is correct
+    # Don't reveal which one failed (security best practice)
+    if not user or not verify_password(form_data.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Create access token with user id as subject
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": str(user.id)},
+        expires_delta=access_token_expires,
+    )
+    return Token(access_token=access_token, token_type="bearer")
+
+@app.get("/me", response_model=UserPrivate)
+async def get_current_user(current_user: CurrentUser):
+    """Returns the current signed in user"""
+    
+    return current_user
 
 @app.get("/{user_id}", response_model=UserPublic)
 async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
@@ -103,9 +151,16 @@ async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_d
 async def update_user(
     user_id: int,
     user_update: UserUpdate,
+    current_user:CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Updates the user profile with the supplied info."""
+
+    if user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform this action.",
+        )
 
     result = await db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
@@ -162,9 +217,16 @@ async def update_user(
 @app.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     user_id: int,
+    current_user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Deletes the profile of the user."""
+
+    if user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform this action.",
+        )
 
     result = await db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()

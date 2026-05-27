@@ -7,7 +7,7 @@ from pathlib import Path
 # getting the database directory path.
 
 CURRENT_DIR = Path(__file__).parent
-APP_DIR = Path(CURRENT_DIR).parent
+APP_DIR = Path(CURRENT_DIR).parent.parent
 DATABASE_DIR = f"{Path(APP_DIR).parent}/database"
 
 # Database Path

@@ -27,9 +27,10 @@ function AuthPageContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    // setIsLoading(true
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500))
+
     setIsLoading(false)
     // Redirect to home on success
     window.location.href = '/'

@@ -8,9 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 import backend.app.utils.db.models as models
+from backend.app.utils.auth import CurrentUser
 
 from backend.app.utils.db import get_db
 from backend.app.api.schemas.schema import PostCreate, PostResponse, PostUpdate
+
 
 app = APIRouter()
 
@@ -35,6 +37,7 @@ async def get_posts(db: Annotated[AsyncSession, Depends(get_db)]):
 )
 async def create_post(
     post: PostCreate,
+    current_user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Creates a new post"""
@@ -42,7 +45,7 @@ async def create_post(
     new_post = models.Post(
         title=post.title,
         content=post.content,
-        user_id=1,  # TEMPORARY
+        user_id=current_user.id,  
     )
 
     db.add(new_post)
@@ -73,6 +76,7 @@ async def get_post(post_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
 async def update_post(
     post_id: int,
     post_data: PostUpdate,
+    current_user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Updates a specific post."""
@@ -84,6 +88,12 @@ async def update_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Post not found",
+        )
+
+    if post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform this action",
         )
 
     update_data = post_data.model_dump(exclude_unset=True)
@@ -98,6 +108,7 @@ async def update_post(
 @app.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(
     post_id: int,
+    current_user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Deletes a specific post."""
@@ -108,6 +119,12 @@ async def delete_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Post not found",
+        )
+    
+    if post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform this action",
         )
 
     await db.delete(post)

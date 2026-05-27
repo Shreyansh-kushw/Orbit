@@ -78,3 +78,12 @@ class PostResponse(PostBase):
     user_id: int
     date_posted: datetime
     author: UserPublic
+
+
+# Token model
+
+class Token(BaseModel):
+    """Schema class for the access jwt token"""
+
+    access_token: str
+    token_type: str
