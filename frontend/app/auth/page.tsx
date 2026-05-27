@@ -90,15 +90,52 @@ function AuthPageContent() {
         }
         return
       }
+    }
+    // Login Validation
+    else {
+      setIsLoading(true)
+
+      const data = new FormData()
+      data.append('username', formData.email)
+      data.append('password', formData.password)
+
+      try {
+        const response = await fetch(`${API_URL}/api/users/token`,
+          {
+            method: 'POST',
+            body: data,
+          }
+        );
+
+        if (response.ok) {
+          setIsLoading(false)
 
 
+          const data = await response.json()
+          localStorage.setItem('access_token', data.access_token)
+          setMessage(`Login Successful.`)
+
+          window.location.href = "/"
+
+          return
+        }
+        else {
+          const errorResponse = await response.json()
+          throw new Error(`Error: ${response.status}: ${JSON.stringify(errorResponse.detail)}`)
+        }
+
+      }
+      catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message)
+        }
+        else {
+          setError(`An unexpected error occured: ${error}`)
+        }
+        return
+      }
     }
 
-    // Simulate API call
-    // await new Promise(resolve => setTimeout(resolve, 1500))
-
-    // setIsLoading(false)
-    // Redirect to home on success
 
   }
 

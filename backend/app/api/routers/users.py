@@ -82,8 +82,8 @@ async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    # Look up user by email (case-insensitive)
-    # Note: OAuth2PasswordRequestForm uses "username" field, but we treat it as email
+    """Takes in the login credentials and returns the access token"""
+    
     result = await db.execute(
         select(models.User).where(
             func.lower(models.User.email) == form_data.username.lower(),
@@ -92,7 +92,6 @@ async def login_for_access_token(
     user = result.scalars().first()
 
     # Verify user exists and password is correct
-    # Don't reveal which one failed (security best practice)
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
