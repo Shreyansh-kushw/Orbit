@@ -1,15 +1,49 @@
+'use client'
+
+import Cookies from 'js-cookie';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
+let currentUser: any = null;
+let fetchPromise: any = null;
 
-export async function getCurrentUser(){
-    const response = await fetch(`${API_URL}/api/users/me`)
+export async function getCurrentUser() {
+    if (currentUser) {
+        return currentUser;
+    }
 
-    if (response.ok){
-        const result = await response.json()
-        return result
+    // Return in-progress fetch to prevent duplicate API calls
+    if (fetchPromise) {
+        return fetchPromise;
     }
-    else{
-        return null
+
+    const token: string | undefined = Cookies.get('access_token');
+    if (!token) {
+        return null;
     }
+
+    fetchPromise = (async () => {
+        try {
+            const response = await fetch("/api/users/me", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.ok) {
+                currentUser = await response.json();
+                return currentUser;
+            }
+
+            return null;
+        } catch (error) {
+            console.error("Error fetching current user:", error);
+            return null;
+        } finally {
+            fetchPromise = null;
+        }
+    })();
+
+    return fetchPromise;
 
 }
