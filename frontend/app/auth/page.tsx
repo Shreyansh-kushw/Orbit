@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
+const EXPIRE_MINS: number = parseInt(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || "60", 10)
 
 function AuthPageContent() {
   const searchParams = useSearchParams()
@@ -112,6 +113,9 @@ function AuthPageContent() {
 
 
           const data = await response.json()
+          const expiry = new Date()
+          expiry.setTime(expiry.getTime() + (EXPIRE_MINS * 60 * 1000))
+          document.cookie = `access_token=${data.access_token}; expires=`
           localStorage.setItem('access_token', data.access_token)
           setMessage(`Login Successful.`)
 
