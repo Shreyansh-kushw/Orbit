@@ -55,8 +55,12 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center glow-primary transition-all duration-300 group-hover:scale-105">
-              <span className="text-primary-foreground font-bold text-sm">O</span>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center glow-primary transition-all duration-300 group-hover:scale-105">
+              <img
+                src="/logo-navbar.png"
+                alt="O"
+                // className="w-30 h-3"
+              />
             </div>
             <span className="text-xl font-bold text-foreground hidden sm:block">ORBIT</span>
           </Link>
@@ -141,7 +145,7 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
                     <button onClick={async () => {
                       await logout()
                     }} className="flex items-center gap-2 text-destructive w-full"
-                    style={{ cursor: 'pointer' }}>
+                      style={{ cursor: 'pointer' }}>
                       <LogOut className="w-4 h-4" />
                       <span>Logout</span>
                     </button>
