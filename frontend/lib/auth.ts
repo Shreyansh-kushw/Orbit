@@ -1,9 +1,9 @@
 'use server'
 
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
-
 let currentUser: any = null;
 let fetchPromise: any = null;
 
@@ -52,5 +52,5 @@ export async function logout() {
     const cookieStore = await cookies()
     cookieStore.delete('access_token')
     currentUser = null
-
+    redirect("/")
 }
