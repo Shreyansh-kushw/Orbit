@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Send, FileText, Eye, AlertCircle } from 'lucide-react'
@@ -10,7 +10,9 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
-import { currentUser } from '@/lib/mock-data'
+import { getCurrentUser } from '@/lib/auth'
+import { User } from '@/lib/schemas'
+import { mapUser } from '@/lib/utils'
 
 export default function CreatePostPage() {
   const router = useRouter()
@@ -18,6 +20,25 @@ export default function CreatePostPage() {
   const [content, setContent] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isPreview, setIsPreview] = useState(false)
+
+  let user: User | null;
+
+  const [rawUser, setRawUser] = useState(null)
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      if (user){
+        setRawUser(user)
+      }
+    })
+  }, [])
+
+  if (rawUser) {
+    user = mapUser(rawUser)
+  }
+  else {
+    user = null
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,7 +48,7 @@ export default function CreatePostPage() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500))
     setIsSubmitting(false)
-    
+
     // Redirect to home
     router.push('/')
   }
@@ -37,18 +58,14 @@ export default function CreatePostPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar 
-        isAuthenticated={true} 
-        user={{
-          username: currentUser.username,
-          displayName: currentUser.displayName,
-          avatar: currentUser.avatar,
-        }}
+      <Navbar
+        isAuthenticated={!!user}
+        user={user || undefined}
       />
-      
+
       <main className="max-w-3xl mx-auto px-4 py-6">
         {/* Back Button */}
-        <Link 
+        <Link
           href="/"
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
@@ -171,7 +188,7 @@ export default function CreatePostPage() {
               <div className="mb-6 pb-6 border-b border-border/50">
                 <span className="text-xs text-accent uppercase tracking-wider">Preview</span>
               </div>
-              
+
               {title || content ? (
                 <article>
                   <h1 className="text-2xl font-bold text-foreground mb-4">

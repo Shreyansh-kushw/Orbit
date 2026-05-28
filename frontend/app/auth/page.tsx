@@ -9,12 +9,22 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import Cookies from 'js-cookie';
+import { getCurrentUser } from '@/lib/auth'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 const EXPIRE_MINS: number = parseInt(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || "60", 10)
 
 function AuthPageContent() {
+
   const searchParams = useSearchParams()
+  const [currentUser, setCurrentUSer] = useState(null)
+  // const rawUser = await getCurrentUser()
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      setCurrentUSer(user)
+    })
+  })
+
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'login'
   const msg = searchParams.get('message')
 
