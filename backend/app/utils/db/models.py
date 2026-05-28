@@ -84,6 +84,3 @@ class Post(Base):
 
     author: Mapped[User] = relationship(back_populates="posts")
 
-
-if __name__ == "__main__":
-    print(f"{Path(Path(APP_DIR).parent).parent}/frontend/public/placeholder-user.jpg")

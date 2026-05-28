@@ -126,6 +126,7 @@ export default function CreatePostPage() {
                 size="sm"
                 onClick={() => setIsPreview(!isPreview)}
                 className={cn(isPreview && "bg-secondary")}
+                style={{cursor: 'pointer'}}
               >
                 <Eye className="w-4 h-4 mr-1" />
                 {isPreview ? 'Edit' : 'Preview'}
@@ -198,8 +199,9 @@ export default function CreatePostPage() {
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/50">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="secondary"
                   onClick={() => router.back()}
+                  style={{cursor: 'pointer'}}
                 >
                   Cancel
                 </Button>
@@ -207,6 +209,7 @@ export default function CreatePostPage() {
                   type="submit"
                   disabled={isSubmitting || !title.trim() || !content.trim()}
                   className="bg-primary hover:bg-primary/90 glow-primary"
+                  style={{cursor: 'pointer'}}
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
@@ -215,7 +218,7 @@ export default function CreatePostPage() {
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      <Send className="w-4 h-4" />
+                      <Send className="w-4 h-4"/>
                       Publish Post
                     </span>
                   )}

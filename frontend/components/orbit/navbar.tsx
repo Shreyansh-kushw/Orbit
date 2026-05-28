@@ -117,7 +117,7 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-secondary/80" style={{ cursor: 'pointer' }}>
+                  <Button variant="ghost" className="flex items-center gap-2 px-0 py-5 hover:bg-secondary/80" style={{ cursor: 'pointer' }}>
                     <Avatar className="w-8 h-8">
                       <AvatarImage src={currentUser.avatar} alt={currentUser.displayName} />
                       <AvatarFallback>{currentUser.displayName[0]}</AvatarFallback>
@@ -140,11 +140,8 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <button onClick={async () => {
-                      await logout()
-                    }} className="flex items-center gap-2 text-destructive w-full"
-                      style={{ cursor: 'pointer' }}>
+                  <DropdownMenuItem variant="destructive" asChild>
+                    <button onClick={async () => { await logout() }} className="w-full" style={{ cursor: 'pointer' }}>
                       <LogOut className="w-4 h-4" />
                       <span>Logout</span>
                     </button>
