@@ -303,7 +303,7 @@ function AuthPageContent() {
                       value={formData.username}
                       onChange={(e) => setFormData({
                         ...formData,
-                        username: e.target.value.replace(/[\s-]/g, '')
+                        username: e.target.value.replace(/[^a-zA-Z0-9_]/g, '')
                       })}
                       className="pl-10 bg-secondary/30 border-border/50 focus:border-primary/50"
                       required
