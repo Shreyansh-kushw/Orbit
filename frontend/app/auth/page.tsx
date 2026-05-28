@@ -56,6 +56,13 @@ function AuthPageContent() {
         setError("Password should be atleast 8 characters long.")
         return
       }
+
+      if (formData.username.includes(' ') || formData.username.includes('-')) {
+        setError("Username cannot contain spaces or hyphens.")
+        setIsLoading(false)
+        return
+      }
+
       try {
         const response = await fetch(`${API_URL}/api/users`,
           {
@@ -116,8 +123,8 @@ function AuthPageContent() {
           const data = await response.json()
           const expiry = new Date()
           expiry.setTime(expiry.getTime() + (EXPIRE_MINS * 60 * 1000))
-          
-          Cookies.set(`access_token`, data.access_token, { expires : expiry, path : '/'})
+
+          Cookies.set(`access_token`, data.access_token, { expires: expiry, path: '/' })
           setMessage(`Login Successful.`)
           window.location.href = "/"
           return
@@ -127,7 +134,7 @@ function AuthPageContent() {
           const errorResponse = await response.json()
           throw new Error(`Error: ${JSON.stringify(errorResponse.detail).replaceAll(`"`, ``)}`)
         }
-        
+
 
       }
       catch (error: unknown) {
@@ -294,7 +301,10 @@ function AuthPageContent() {
                       type="text"
                       placeholder="Username"
                       value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        username: e.target.value.replace(/[\s-]/g, '')
+                      })}
                       className="pl-10 bg-secondary/30 border-border/50 focus:border-primary/50"
                       required
                     />
