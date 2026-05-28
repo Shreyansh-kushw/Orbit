@@ -59,7 +59,6 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
               <img
                 src="/logo-navbar.png"
                 alt="O"
-                // className="w-30 h-3"
               />
             </div>
             <span className="text-xl font-bold text-foreground hidden sm:block">ORBIT</span>

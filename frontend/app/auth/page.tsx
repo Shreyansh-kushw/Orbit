@@ -170,8 +170,11 @@ function AuthPageContent() {
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
           <Link href="/" className="flex items-center gap-3 mb-12">
-            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center glow-primary">
-              <span className="text-primary-foreground font-bold text-xl">O</span>
+            <div className="w-16 h-16 rounded-xl flex items-center justify-center glow-primary">
+              <img
+                src="/logo-navbar.png"
+                alt="O"
+              />
             </div>
             <span className="text-3xl font-bold text-foreground">ORBIT</span>
           </Link>
