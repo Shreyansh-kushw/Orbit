@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { 
-  Home, 
-  Compass, 
-  Bell, 
-  PenSquare, 
-  Search, 
+import {
+  Home,
+  Compass,
+  Bell,
+  PenSquare,
+  Search,
   LogOut,
   Menu,
   X,
@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
+import { logout } from '@/lib/auth'
 
 interface NavbarProps {
   isAuthenticated?: boolean
@@ -113,7 +114,7 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-secondary/80">
+                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-secondary/80" style={{ cursor: 'pointer' }}>
                     <Avatar className="w-8 h-8">
                       <AvatarImage src={currentUser.avatar} alt={currentUser.displayName} />
                       <AvatarFallback>{currentUser.displayName[0]}</AvatarFallback>
@@ -124,23 +125,26 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 glass">
                   <DropdownMenuItem asChild>
-                    <Link href={`/profile/${currentUser.username}`} className="flex items-center gap-2">
+                    <Link href={`/profile/${currentUser.username}`} className="flex items-center gap-2" style={{ cursor: 'pointer' }}>
                       <User className="w-4 h-4" />
                       <span>Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/settings" className="flex items-center gap-2">
+                    <Link href="/settings" className="flex items-center gap-2" style={{ cursor: 'pointer' }}>
                       <Settings className="w-4 h-4" />
                       <span>Settings</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/auth" className="flex items-center gap-2 text-destructive">
+                    <button onClick={async () => {
+                      await logout()
+                    }} className="flex items-center gap-2 text-destructive w-full"
+                    style={{ cursor: 'pointer' }}>
                       <LogOut className="w-4 h-4" />
                       <span>Logout</span>
-                    </Link>
+                    </button>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -190,16 +194,16 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
   )
 }
 
-function NavLink({ 
-  href, 
-  icon, 
-  label, 
-  badge 
-}: { 
+function NavLink({
+  href,
+  icon,
+  label,
+  badge
+}: {
   href: string
   icon: React.ReactNode
   label: string
-  badge?: number 
+  badge?: number
 }) {
   return (
     <Link
@@ -217,12 +221,12 @@ function NavLink({
   )
 }
 
-function MobileNavLink({ 
-  href, 
-  icon, 
+function MobileNavLink({
+  href,
+  icon,
   label,
-  onClick 
-}: { 
+  onClick
+}: {
   href: string
   icon: React.ReactNode
   label: string

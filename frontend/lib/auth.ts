@@ -1,3 +1,5 @@
+'use server'
+
 import { cookies } from 'next/headers'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -20,7 +22,6 @@ export async function getCurrentUser() {
     if (!token) {
         return null;
     }
-
     fetchPromise = (async () => {
         try {
             const response = await fetch(`${API_URL}/api/users/me`, {
@@ -44,5 +45,12 @@ export async function getCurrentUser() {
     })();
 
     return fetchPromise;
+
+}
+
+export async function logout() {
+    const cookieStore = await cookies()
+    cookieStore.delete('access_token')
+    currentUser = null
 
 }
