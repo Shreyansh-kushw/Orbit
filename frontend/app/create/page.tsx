@@ -13,6 +13,9 @@ import { cn } from '@/lib/utils'
 import { getCurrentUser } from '@/lib/auth'
 import { User } from '@/lib/schemas'
 import { mapUser } from '@/lib/utils'
+import Cookies from 'js-cookie';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 export default function CreatePostPage() {
   const router = useRouter()
@@ -21,12 +24,15 @@ export default function CreatePostPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isPreview, setIsPreview] = useState(false)
 
+  const [message, setMessage] = useState<string | null>(null);
+  const [exception, setError] = useState<string | null>(null);
+
   let user: User | null;
 
   const [rawUser, setRawUser] = useState(null)
   useEffect(() => {
     getCurrentUser().then((user) => {
-      if (user){
+      if (user) {
         setRawUser(user)
       }
     })
@@ -45,12 +51,46 @@ export default function CreatePostPage() {
     if (!title.trim() || !content.trim()) return
 
     setIsSubmitting(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsSubmitting(false)
+    const token = Cookies.get('access_token')
+    // API call
+    try {
+      const response = await fetch(`${API_URL}/api/posts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(
+            {
+              title: title,
+              content: content,
+            }
+          )
+        }
+      );
 
-    // Redirect to home
-    router.push('/')
+      if (!response.ok) {
+        const errorResponse = await response.json()
+        throw new Error(`Error: ${JSON.stringify(errorResponse.detail).replaceAll(`"`, ``)}`)
+      }
+      else {
+        const msg = `Post created successfully!`
+
+        // Redirect to home
+        router.push('/')
+      }
+    }
+    catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message)
+      }
+      else {
+        setError(`An unexpected error occured: ${error}`)
+      }
+      return
+    }
+    setIsSubmitting(false)
   }
 
   const characterCount = content.length
