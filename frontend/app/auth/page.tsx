@@ -25,6 +25,7 @@ function AuthPageContent() {
 
   const [formData, setFormData] = useState({
     email: '',
+    name: '',
     username: '',
     password: '',
     confirmPassword: '',
@@ -66,7 +67,7 @@ function AuthPageContent() {
               {
                 email: formData.email,
                 username: formData.username,
-                name: "John Doe",
+                name: formData.name,
                 password: formData.password
               }
             )
@@ -76,7 +77,7 @@ function AuthPageContent() {
         setIsLoading(false)
         if (!response.ok) {
           const errorResponse = await response.json()
-          throw new Error(`Error: ${response.status}: ${JSON.stringify(errorResponse.detail)}`)
+          throw new Error(`Error: ${JSON.stringify(errorResponse.detail).replaceAll(`"`, ``)}`)
         }
         else {
           const msg = `Sign up successfull, kindly login.`
@@ -124,7 +125,7 @@ function AuthPageContent() {
         else {
           setIsLoading(false)
           const errorResponse = await response.json()
-          throw new Error(`Error: ${response.status}: ${JSON.stringify(errorResponse.detail)}`)
+          throw new Error(`Error: ${JSON.stringify(errorResponse.detail).replaceAll(`"`, ``)}`)
         }
         
 
@@ -145,7 +146,7 @@ function AuthPageContent() {
 
   const toggleMode = () => {
     setMode(mode === 'login' ? 'signup' : 'login')
-    setFormData({ email: '', username: '', password: '', confirmPassword: '' })
+    setFormData({ email: '', name: '', username: '', password: '', confirmPassword: '' })
   }
 
   return (
@@ -263,6 +264,25 @@ function AuthPageContent() {
                 </div>
               </div>
 
+              {/* Name (Signup only) */}
+              {mode === 'signup' && (
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-foreground">Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Your full name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="pl-10 bg-secondary/30 border-border/50 focus:border-primary/50"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
+
               {/* Username (Signup only) */}
               {mode === 'signup' && (
                 <div className="space-y-2">
@@ -272,7 +292,7 @@ function AuthPageContent() {
                     <Input
                       id="username"
                       type="text"
-                      placeholder="Your Name"
+                      placeholder="Username"
                       value={formData.username}
                       onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                       className="pl-10 bg-secondary/30 border-border/50 focus:border-primary/50"
