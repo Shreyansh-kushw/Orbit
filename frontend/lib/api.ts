@@ -12,7 +12,7 @@ export async function getPosts() {
     return response.json()
 }
 
-export async function getPostsByID(post_id: string): Promise<PostApiResponse>{
+export async function getPostsByID(post_id: string): Promise<PostApiResponse> {
     const response = await fetch(`${API_URL}/api/posts/${post_id}`)
 
     if (!response.ok) {
@@ -20,6 +20,31 @@ export async function getPostsByID(post_id: string): Promise<PostApiResponse>{
     }
 
     return response.json()
+}
+
+export async function deletePost(post_id: string, token: string | undefined) {
+
+    try {
+        const response = await fetch(`${API_URL}/api/posts/${post_id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+            throw new Error(result.detail || "Something went wrong")
+
+        }
+
+        return response.json
+    }
+    catch (error: any) {
+        console.log(error.message)
+    }
 }
 
 
@@ -32,7 +57,7 @@ export interface PostApiResponse {
     date_posted: string
 
     author: {
-        id:number
+        id: number
         username: string
         name: string
         image_file: string | null
@@ -42,10 +67,10 @@ export interface PostApiResponse {
 
 export interface UserPublicApiResponse {
 
-    id:number
+    id: number
     username: string
     name: string
     image_file: string | null
     image_path: string
-    
+
 }

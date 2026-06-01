@@ -18,6 +18,8 @@ import { getPostsByID, PostApiResponse } from '@/lib/api'
 import { mapPost, mapUser } from '@/lib/utils'
 import { Post, User } from '@/lib/schemas'
 import { getCurrentUser } from '@/lib/auth'
+import { deletePost } from '@/lib/api'
+import Cookies from 'js-cookie'
 
 export default function PostPage() {
 
@@ -31,6 +33,7 @@ export default function PostPage() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const token = Cookies.get('access_token')
 
   useEffect(() => {
     getCurrentUser().then((u) => {
@@ -74,8 +77,9 @@ export default function PostPage() {
     isAuthor,
   })
 
-  const handleDelete = async () => {
-    // TODO: await deletePost(postId)
+  const handleDelete = async (postId: string) => {
+    
+    await deletePost(postId, token)
     router.push('/')
   }
 
@@ -205,7 +209,7 @@ export default function PostPage() {
               <Button variant="ghost" onClick={() => setShowDeleteConfirm(false)}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleDelete}>
+              <Button variant="destructive" onClick={() => handleDelete(post.id.toString())}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </Button>
