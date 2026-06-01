@@ -141,6 +141,7 @@ export default function PostPage() {
                       size="sm"
                       onClick={() => setMenuOpen(!menuOpen)}
                       className="text-muted-foreground hover:text-foreground"
+                      style={{cursor: 'pointer'}}
                     >
                       <MoreVertical className="w-5 h-5" />
                     </Button>
@@ -151,6 +152,7 @@ export default function PostPage() {
                           href={`/post/${postId}/edit`}
                           className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground hover:bg-muted/50 transition-colors"
                           onClick={() => setMenuOpen(false)}
+                          
                         >
                           <Pencil className="w-4 h-4" />
                           Edit post
@@ -161,8 +163,9 @@ export default function PostPage() {
                             setShowDeleteConfirm(true)
                           }}
                           className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                          style={{cursor: 'pointer'}}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4"/>
                           Delete post
                         </button>
                       </div>
@@ -206,10 +209,10 @@ export default function PostPage() {
               This action cannot be undone. The post will be permanently removed.
             </p>
             <div className="flex gap-3 justify-end">
-              <Button variant="ghost" onClick={() => setShowDeleteConfirm(false)}>
+              <Button variant="ghost" onClick={() => setShowDeleteConfirm(false)} style={{cursor: 'pointer'}}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={() => handleDelete(post.id.toString())}>
+              <Button variant="destructive" onClick={() => handleDelete(post.id.toString())} style={{cursor: 'pointer'}}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </Button>
