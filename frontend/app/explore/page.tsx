@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useEffect, useState, Suspense, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Search, TrendingUp, Hash, Filter } from 'lucide-react'
 import { Navbar } from '@/components/orbit/navbar'
@@ -9,56 +9,92 @@ import { PostCard } from '@/components/orbit/post-card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { mockPosts, trendingTopics, currentUser } from '@/lib/mock-data'
+import { getPosts } from '@/lib/api'
+import { mapPost } from '@/lib/utils'
+import { PostApiResponse } from '@/lib/api'
+import { Post, User } from '@/lib/schemas'
+import { mapUser } from '@/lib/utils'
+import { getCurrentUser } from '@/lib/auth'
+
 
 function ExplorePageContent() {
   const searchParams = useSearchParams()
   const initialTag = searchParams.get('tag') || ''
-  
+
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTag, setSelectedTag] = useState(initialTag)
   const [sortBy, setSortBy] = useState<'trending' | 'latest' | 'top'>('trending')
+  const [rawPosts, setRawPosts] = useState<any[] | null>(null)
+  const [rawUser, setRawUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
 
-  // Filter posts based on search and tag
-  const filteredPosts = mockPosts.filter(post => {
-    const matchesSearch = searchQuery === '' || 
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesTag = selectedTag === '' || 
-      post.title.toLowerCase().includes(selectedTag.toLowerCase()) ||
-      post.content.toLowerCase().includes(selectedTag.toLowerCase())
-    
-    return matchesSearch && matchesTag
-  })
+  useEffect(() => {
+    getPosts().then((posts) => {
+      if (posts) setRawPosts(posts)
+    })
+  }, [])
 
-  // Sort posts
-  const sortedPosts = [...filteredPosts].sort((a, b) => {
-    switch (sortBy) {
-      case 'trending':
-        return (b.likes + b.comments * 2) - (a.likes + a.comments * 2)
-      case 'latest':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      case 'top':
-        return b.likes - a.likes
-      default:
-        return 0
-    }
-  })
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      if (user) setRawUser(user)
+      setAuthLoading(false)
+    })
+  }, [])
+
+  const posts: Post[] = useMemo(() => rawPosts ? rawPosts.map(mapPost) : [], [rawPosts])
+  const user: User | null = rawUser ? mapUser(rawUser) : null
+
+  // Derive trending topics from real post data
+  const trendingTopics = useMemo(() => {
+    const allTags = ['AI', 'Technology', 'Programming', 'Science', 'Philosophy', 'Web3', 'Space', 'Future']
+    return allTags.map(tag => ({
+      tag,
+      posts: posts.filter(p =>
+        p.title.toLowerCase().includes(tag.toLowerCase()) ||
+        p.content.toLowerCase().includes(tag.toLowerCase())
+      ).length
+    })).sort((a, b) => b.posts - a.posts)
+  }, [posts])
 
   const allTags = ['AI', 'Technology', 'Programming', 'Science', 'Philosophy', 'Web3', 'Space', 'Future']
 
+  // Filter posts based on search and tag
+  const filteredPosts = useMemo(() => posts.filter(post => {
+    const matchesSearch = searchQuery === '' ||
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesTag = selectedTag === '' ||
+      post.title.toLowerCase().includes(selectedTag.toLowerCase()) ||
+      post.content.toLowerCase().includes(selectedTag.toLowerCase())
+
+    return matchesSearch && matchesTag
+  }), [posts, searchQuery, selectedTag])
+
+  // Sort posts
+  const sortedPosts = useMemo(() => [...filteredPosts].sort((a, b) => {
+    switch (sortBy) {
+      // case 'trending':
+      //   return (b.likes + b.comments * 2) - (a.likes + a.comments * 2)
+      case 'latest':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      // case 'top':
+      //   return b.likes - a.likes
+      default:
+        return 0
+    }
+  }), [filteredPosts, sortBy])
+
   return (
     <div className="min-h-screen bg-background">
-      <Navbar 
-        isAuthenticated={true} 
-        user={{
-          username: currentUser.username,
-          displayName: currentUser.displayName,
-          avatar: currentUser.avatar,
-        }}
-      />
-      
+      {!authLoading && (
+        <Navbar
+          isAuthenticated={!!user}
+          user={user || undefined}
+        />
+      )}
+      {authLoading && <div className="h-16" />}
+
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-6">
           {/* Main Content */}
@@ -138,7 +174,7 @@ function ExplorePageContent() {
 
             {/* Trending Topics Cards */}
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {trendingTopics.map((topic, index) => (
+              {trendingTopics.slice(0, 5).map((topic, index) => (
                 <button
                   key={topic.tag}
                   onClick={() => setSelectedTag(topic.tag)}
@@ -149,7 +185,7 @@ function ExplorePageContent() {
                 >
                   <span className="text-xs text-muted-foreground">#{index + 1} Trending</span>
                   <p className="font-semibold text-foreground mt-1">#{topic.tag}</p>
-                  <p className="text-xs text-accent mt-1">{(topic.posts / 1000).toFixed(1)}K posts</p>
+                  <p className="text-xs text-accent mt-1">{topic.posts} posts</p>
                 </button>
               ))}
             </div>
@@ -165,7 +201,11 @@ function ExplorePageContent() {
                 </h2>
               </div>
 
-              {sortedPosts.length > 0 ? (
+              {!rawPosts ? (
+                <div className="flex justify-center py-12">
+                  <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              ) : sortedPosts.length > 0 ? (
                 sortedPosts.map(post => (
                   <PostCard key={post.id} post={post} />
                 ))

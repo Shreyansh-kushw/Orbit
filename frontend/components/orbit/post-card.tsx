@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { Post } from '@/lib/mock-data'
+import type { Post } from '@/lib/schemas'
 
 interface PostCardProps {
   post: Post
@@ -95,7 +95,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
               <span>·</span>
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {formatDate(post.createdAt)}
+                {post.createdAt.toISOString()}
               </span>
             </div>
           </div>
