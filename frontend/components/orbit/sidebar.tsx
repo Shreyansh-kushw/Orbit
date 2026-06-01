@@ -127,12 +127,9 @@ export function Sidebar() {
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
             <Link href="/help" className="hover:text-foreground transition-colors">Help</Link>
-            <a href="https://twitter.com" className="hover:text-foreground transition-colors flex items-center gap-1">
-              Twitter <ExternalLink className="w-3 h-3" />
-            </a>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            © 2024 ORBIT. All rights reserved.
+            © 2026 ORBIT. All rights reserved.
           </p>
         </div>
       </div>
