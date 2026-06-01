@@ -22,13 +22,8 @@ import { cn } from '@/lib/utils'
 import { getPostsByID, PostApiResponse } from '@/lib/api'
 import { mapPost } from '@/lib/utils'
 import { Post, User } from '@/lib/schemas'
-
-const currentUser: User = { // TEMPORARY
-  id: 1,
-  username: 'orbituser',
-  displayName: 'Orbit User',
-  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=orbituser',
-}
+import { mapUser } from '@/lib/utils'
+import { getCurrentUser } from '@/lib/auth'
 
 export default function PostPage() {
 
@@ -36,6 +31,24 @@ export default function PostPage() {
   const postId = params.id as string
 
   const [rawPost, setPost] = useState<PostApiResponse | null>(null)
+
+  let user: User | null;
+
+  const [rawUser, setRawUser] = useState(null)
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      if (user) {
+        setRawUser(user)
+      }
+    })
+  }, [])
+
+  if (rawUser) {
+    user = mapUser(rawUser)
+  }
+  else {
+    user = null
+  }
 
   useEffect(() => {
     async function loadPost() {
@@ -45,7 +58,7 @@ export default function PostPage() {
     loadPost()
   }, [postId])
 
-  if (!rawPost){
+  if (!rawPost) {
     return
   }
 
@@ -105,12 +118,8 @@ export default function PostPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar
-        isAuthenticated={true}
-        user={{
-          username: currentUser.username,
-          displayName: currentUser.displayName,
-          avatar: currentUser.avatar,
-        }}
+        isAuthenticated={!!user}
+        user={user || undefined}
       />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
