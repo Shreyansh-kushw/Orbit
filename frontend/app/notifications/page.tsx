@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { 
   Bell, 
@@ -17,7 +17,10 @@ import { Navbar } from '@/components/orbit/navbar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { mockUsers, currentUser } from '@/lib/mock-data'
+import { mockUsers } from '@/lib/mock-data'
+import { getCurrentUser } from '@/lib/auth'
+import { mapUser } from '@/lib/utils'
+import { User } from '@/lib/schemas'
 
 interface Notification {
   id: string
@@ -84,6 +87,17 @@ const mockNotifications: Notification[] = [
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState(mockNotifications)
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
+  const [authLoading, setAuthLoading] = useState(true)
+  const [rawUser, setRawUser] = useState(null)
+
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      if (user) setRawUser(user)
+      setAuthLoading(false)
+    })
+  }, [])
+
+  const user: User | null = rawUser ? mapUser(rawUser) : null
 
   const filteredNotifications = notifications.filter(n => 
     filter === 'all' ? true : !n.isRead
@@ -131,14 +145,13 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar 
-        isAuthenticated={true} 
-        user={{
-          username: currentUser.username,
-          displayName: currentUser.displayName,
-          avatar: currentUser.avatar,
-        }}
-      />
+      {!authLoading && (
+        <Navbar 
+          isAuthenticated={!!user} 
+          user={user || undefined}
+        />
+      )}
+      {authLoading && <div className="h-16" />}
       
       <main className="max-w-3xl mx-auto px-4 py-6">
         {/* Back Button */}

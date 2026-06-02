@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Send, FileText, Eye, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Send, FileText, Eye, AlertCircle, Hash, X, Plus } from 'lucide-react'
 import { Navbar } from '@/components/orbit/navbar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,6 +21,8 @@ export default function CreatePostPage() {
   const router = useRouter()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [tags, setTags] = useState<string[]>([])
+  const [tagInput, setTagInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isPreview, setIsPreview] = useState(false)
 
@@ -46,6 +48,22 @@ export default function CreatePostPage() {
   }
 
 
+  const handleAddTag = (e: React.KeyboardEvent | React.MouseEvent) => {
+    if ('key' in e && e.key !== 'Enter') return
+    e.preventDefault()
+    
+    const tag = tagInput.trim().replace(/^#/, '')
+    if (tag && !tags.includes(tag) && tags.length < 5) {
+      setTags([...tags, tag])
+      setTagInput('')
+    }
+  }
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove))
+  }
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim() || !content.trim()) return
@@ -65,6 +83,7 @@ export default function CreatePostPage() {
             {
               title: title,
               content: content,
+              tags: tags.join(','),
             }
           )
         }
@@ -183,6 +202,57 @@ export default function CreatePostPage() {
                 </div>
               </div>
 
+              {/* Tags */}
+              <div className="space-y-3">
+                <Label htmlFor="tags" className="text-foreground flex items-center gap-2">
+                  <Hash className="w-4 h-4 text-primary" />
+                  Tags
+                </Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {tags.map(tag => (
+                    <span 
+                      key={tag} 
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm border border-primary/20"
+                    >
+                      #{tag}
+                      <button 
+                        type="button" 
+                        onClick={() => removeTag(tag)}
+                        className="hover:text-foreground transition-colors"
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                {tags.length < 5 && (
+                  <div className="relative">
+                    <Input
+                      id="tags"
+                      placeholder="Add tags (press Enter)..."
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={handleAddTag}
+                      className="bg-secondary/30 border-border/50 focus:border-primary/50 pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleAddTag}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-muted-foreground hover:text-primary"
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Add up to 5 tags to help people find your post
+                </p>
+              </div>
+
               {/* Guidelines */}
               <div className="bg-secondary/30 rounded-lg p-4">
                 <div className="flex items-start gap-3">
@@ -240,6 +310,13 @@ export default function CreatePostPage() {
                   <h1 className="text-2xl font-bold text-foreground mb-4">
                     {title || 'Untitled Post'}
                   </h1>
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {tags.map(tag => (
+                      <span key={tag} className="text-sm text-primary font-medium">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
                   <p className="text-foreground leading-relaxed whitespace-pre-line">
                     {content || 'No content yet...'}
                   </p>

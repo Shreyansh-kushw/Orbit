@@ -21,6 +21,7 @@ export interface Post {
   title: string
   content: string
   createdAt: Date
+  tags?: string[]
 //   likes: number
 //   dislikes: number
 //   comments: number

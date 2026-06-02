@@ -81,6 +81,7 @@ class Post(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
     )
+    tags: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     author: Mapped[User] = relationship(back_populates="posts")
 

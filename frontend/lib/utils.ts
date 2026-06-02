@@ -13,6 +13,7 @@ export function mapPost(post: PostApiResponse): Post {
     title: post.title,
     content: post.content,
     createdAt: new Date(post.date_posted),
+    tags: post.tags ? post.tags.split(',') : [],
     author: {
       id: post.author.id,
       username: post.author.username,

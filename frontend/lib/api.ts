@@ -55,6 +55,7 @@ export interface PostApiResponse {
     title: string
     content: string
     date_posted: string
+    tags: string | null
 
     author: {
         id: number
