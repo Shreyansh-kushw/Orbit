@@ -95,7 +95,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
               <span>·</span>
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {post.createdAt.toISOString()}
+                {new Date(post.createdAt).toDateString()}
               </span>
             </div>
           </div>
