@@ -7,112 +7,49 @@ import { Button } from '@/components/ui/button'
 import { trendingTopics, platformStats, mockUsers } from '@/lib/mock-data'
 
 export function Sidebar() {
-  const suggestedUsers = mockUsers.slice(0, 3)
-
   return (
     <aside className="w-80 flex-shrink-0 hidden lg:block">
-      <div className="sticky top-20 space-y-4">
-        {/* Trending Topics */}
-        <div className="glass rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-foreground">Trending Topics</h3>
+      <div className="sticky top-24 space-y-6">
+        {/* Platform Stats - Horizontal Layout */}
+        <div className="glass rounded-2xl p-6 border-primary/20 bg-primary/5">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center glow-success">
+              <BarChart3 className="w-6 h-6 text-success" />
+            </div>
+            <h3 className="font-bold text-lg text-foreground">Community Pulse</h3>
           </div>
-          <div className="space-y-3">
-            {trendingTopics.map((topic, index) => (
-              <Link
-                key={topic.tag}
-                href={`/explore?tag=${topic.tag}`}
-                className="flex items-center justify-between group"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-sm">{index + 1}</span>
-                  <Hash className="w-4 h-4 text-accent" />
-                  <span className="text-foreground group-hover:text-primary transition-colors">
-                    {topic.tag}
-                  </span>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {formatNumber(topic.posts)} posts
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Suggested Users */}
-        <div className="glass rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Users className="w-5 h-5 text-accent" />
-            <h3 className="font-semibold text-foreground">Who to Follow</h3>
-          </div>
-          <div className="space-y-4">
-            {suggestedUsers.map((user) => (
-              <div key={user.id} className="flex items-center justify-between">
-                <Link
-                  href={`/profile/${user.username}`}
-                  className="flex items-center gap-3 group"
-                >
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={user.avatar} alt={user.displayName} />
-                    <AvatarFallback>{user.displayName[0]}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                      {user.displayName}
-                    </p>
-                    <p className="text-xs text-muted-foreground">@{user.username}</p>
-                  </div>
-                </Link>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground"
-                >
-                  Follow
-                </Button>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-black text-foreground tracking-tight">
+                  {formatNumber(platformStats.totalUsers)}
+                </p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Explorers</p>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Platform Stats */}
-        <div className="glass rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart3 className="w-5 h-5 text-success" />
-            <h3 className="font-semibold text-foreground">Platform Stats</h3>
-          </div>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-lg font-bold text-foreground">
-                {formatNumber(platformStats.totalUsers)}
-              </p>
-              <p className="text-xs text-muted-foreground">Users</p>
-            </div>
-            <div>
-              <p className="text-lg font-bold text-foreground">
-                {formatNumber(platformStats.totalPosts)}
-              </p>
-              <p className="text-xs text-muted-foreground">Posts</p>
-            </div>
-            <div>
-              <p className="text-lg font-bold text-accent">
-                {formatNumber(platformStats.activeNow)}
-              </p>
-              <p className="text-xs text-muted-foreground">Online</p>
+              <div className="text-right">
+                <p className="text-2xl font-black text-foreground tracking-tight">
+                  {formatNumber(platformStats.totalPosts)}
+                </p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Shared Ideas</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Popular Tags */}
-        <div className="glass rounded-xl p-4">
-          <h3 className="font-semibold text-foreground mb-3">Popular Tags</h3>
-          <div className="flex flex-wrap gap-2">
+        {/* Popular Tags - Grid Layout */}
+        <div className="glass rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center glow-primary">
+              <Hash className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="font-bold text-lg text-foreground">Galaxy Tags</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             {['AI', 'Tech', 'Science', 'Philosophy', 'Coding', 'Space', 'Future', 'Web3'].map((tag) => (
               <Link
                 key={tag}
                 href={`/explore?tag=${tag}`}
-                className="px-3 py-1 rounded-full bg-secondary/80 text-sm text-muted-foreground hover:bg-primary/20 hover:text-primary transition-colors"
+                className="px-4 py-3 rounded-xl bg-secondary/30 border border-border/50 text-sm font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all text-center"
               >
                 #{tag}
               </Link>
@@ -120,18 +57,21 @@ export function Sidebar() {
           </div>
         </div>
 
-        {/* Footer Links */}
-        <div className="px-4 py-2">
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
-            <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
+        {/* Footer Links - Horizontal Layout */}
+        <div className="glass rounded-2xl p-6 border-border/20">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-medium text-muted-foreground">
+            <Link href="/about" className="hover:text-primary transition-colors">About</Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
+            <Link href="/faq" className="hover:text-primary transition-colors">FAQ</Link>
+            <Link href="/contact" className="hover:text-primary transition-colors">Contact</Link>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            © 2026 ORBIT. All rights reserved.
-          </p>
+          <div className="mt-6 pt-4 border-t border-border/30 flex items-center justify-between">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+              © 2026 ORBIT
+            </p>
+            <ExternalLink className="w-3 h-3 text-muted-foreground/50" />
+          </div>
         </div>
       </div>
     </aside>

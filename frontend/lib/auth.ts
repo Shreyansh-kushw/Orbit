@@ -2,55 +2,39 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation';
+import { cache } from 'react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
-let currentUser: any = null;
-let fetchPromise: any = null;
 
-export async function getCurrentUser() {
-    if (currentUser) {
-        return currentUser;
-    }
-
-    // Return in-progress fetch to prevent duplicate API calls
-    if (fetchPromise) {
-        return fetchPromise;
-    }
-
+export const getCurrentUser = cache(async () => {
     const cookieStore = await cookies()
     const token = cookieStore.get('access_token')?.value
     if (!token) {
         return null;
     }
-    fetchPromise = (async () => {
-        try {
-            const response = await fetch(`${API_URL}/api/users/me`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
 
-            if (response.ok) {
-                currentUser = await response.json();
-                return currentUser;
-            }
+    try {
+        const response = await fetch(`${API_URL}/api/users/me`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            // Ensure we don't cache the fetch globally at the Next.js level
+            next: { revalidate: 0 } 
+        });
 
-            return null;
-        } catch (error) {
-            console.error("Error fetching current user:", error);
-            return null;
-        } finally {
-            fetchPromise = null;
+        if (response.ok) {
+            return await response.json();
         }
-    })();
 
-    return fetchPromise;
-
-}
+        return null;
+    } catch (error) {
+        console.error("Error fetching current user:", error);
+        return null;
+    }
+});
 
 export async function logout() {
     const cookieStore = await cookies()
     cookieStore.delete('access_token')
-    currentUser = null
     redirect("/")
 }
