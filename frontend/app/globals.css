@@ -130,6 +130,12 @@
   body {
     @apply bg-background text-foreground;
   }
+  button, 
+  a, 
+  [role="button"],
+  .cursor-pointer {
+    cursor: pointer !important;
+  }
 }
 
 /* Custom scrollbar for dark theme */

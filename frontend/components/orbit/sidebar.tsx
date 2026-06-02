@@ -126,7 +126,7 @@ export function Sidebar() {
             <Link href="/about" className="hover:text-foreground transition-colors">About</Link>
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/help" className="hover:text-foreground transition-colors">Help</Link>
+            <Link href="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
             © 2026 ORBIT. All rights reserved.

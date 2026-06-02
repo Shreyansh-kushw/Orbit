@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, Suspense, useMemo } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, TrendingUp, Hash, Filter } from 'lucide-react'
 import { Navbar } from '@/components/orbit/navbar'
 import { Sidebar } from '@/components/orbit/sidebar'
@@ -19,6 +19,7 @@ import { getCurrentUser } from '@/lib/auth'
 
 function ExplorePageContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const initialTag = searchParams.get('tag') || ''
 
   const [searchQuery, setSearchQuery] = useState('')
@@ -27,6 +28,21 @@ function ExplorePageContent() {
   const [rawPosts, setRawPosts] = useState<any[] | null>(null)
   const [rawUser, setRawUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
+
+  const handleTagSelect = (tag: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (tag) {
+      params.set('tag', tag)
+    } else {
+      params.delete('tag')
+    }
+    router.push(`/explore?${params.toString()}`)
+  }
+
+  // Sync selectedTag with URL query parameter
+  useEffect(() => {
+    setSelectedTag(initialTag)
+  }, [initialTag])
 
   useEffect(() => {
     getPosts().then((posts) => {
@@ -126,10 +142,12 @@ function ExplorePageContent() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setSelectedTag('')}
+                  onClick={() => handleTagSelect('')}
                   className={cn(
-                    "rounded-full",
-                    selectedTag === '' && "bg-primary text-primary-foreground border-primary"
+                    "rounded-full transition-all",
+                    selectedTag === '' 
+                      ? "bg-primary text-primary-foreground border-primary glow-primary" 
+                      : "hover:bg-primary/10 hover:text-primary hover:border-primary/50"
                   )}
                 >
                   All Topics
@@ -139,10 +157,12 @@ function ExplorePageContent() {
                     key={tag}
                     variant="outline"
                     size="sm"
-                    onClick={() => setSelectedTag(tag)}
+                    onClick={() => handleTagSelect(tag)}
                     className={cn(
-                      "rounded-full",
-                      selectedTag === tag && "bg-primary text-primary-foreground border-primary"
+                      "rounded-full transition-all",
+                      selectedTag === tag 
+                        ? "bg-primary text-primary-foreground border-primary glow-primary" 
+                        : "hover:bg-primary/10 hover:text-primary hover:border-primary/50"
                     )}
                   >
                     <Hash className="w-3 h-3 mr-1" />
@@ -177,10 +197,10 @@ function ExplorePageContent() {
               {trendingTopics.slice(0, 5).map((topic, index) => (
                 <button
                   key={topic.tag}
-                  onClick={() => setSelectedTag(topic.tag)}
+                  onClick={() => handleTagSelect(topic.tag)}
                   className={cn(
                     "glass rounded-xl p-4 text-left hover:border-primary/50 transition-all",
-                    selectedTag === topic.tag && "border-primary/50 bg-primary/5"
+                    selectedTag === topic.tag && "border-primary/50 bg-primary/10 glow-primary-sm"
                   )}
                 >
                   <span className="text-xs text-muted-foreground">#{index + 1} Trending</span>

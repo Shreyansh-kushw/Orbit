@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter, usePathname } from 'next/navigation'
 import {
   Home,
   Compass,
@@ -40,6 +41,8 @@ interface NavbarProps {
 export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
 
   const defaultUser = {
     username: 'orbituser',
@@ -48,6 +51,21 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
   }
 
   const currentUser = user || defaultUser
+
+  const handleLogout = async () => {
+    await logout()
+    
+    // Define pages that are allowed for unauthenticated users
+    const publicRoutes = ['/', '/explore', '/about', '/privacy', '/terms', '/faq']
+    const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/post/') || pathname.startsWith('/profile/')
+    
+    if (!isPublicRoute) {
+      router.push('/')
+    } else {
+      // Refresh the current page to update authentication state in UI
+      router.refresh()
+    }
+  }
 
   return (
     <nav className="sticky top-0 z-50 glass border-b border-border/50">
@@ -141,7 +159,7 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem variant="destructive" asChild>
-                    <button onClick={async () => { await logout() }} className="w-full" style={{ cursor: 'pointer' }}>
+                    <button onClick={handleLogout} className="w-full cursor-pointer" style={{ cursor: 'pointer' }}>
                       <LogOut className="w-4 h-4" />
                       <span>Logout</span>
                     </button>
