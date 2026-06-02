@@ -63,10 +63,6 @@ export default async function FAQPage() {
         {
           q: "Can I format my posts with Markdown?",
           a: "We currently support standard text with plans to roll out a rich-text editor supporting full Markdown and code snippets in the near future."
-        },
-        {
-          q: "What are 'Glow' effects?",
-          a: "Glow effects are part of our visual language. They highlight high-engagement posts and verified users, making the interface feel alive and interactive."
         }
       ]
     },

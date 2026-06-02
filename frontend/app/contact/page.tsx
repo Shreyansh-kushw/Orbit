@@ -78,57 +78,59 @@ export default async function ContactPage() {
                 </div>
 
                 {/* Contact Form */}
-                <div className="md:col-span-3 p-8 md:p-10">
-                  <form className="space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground ml-1">First Name</label>
+                <div className="md:col-span-3 p-8 md:p-12 lg:p-16 flex flex-col justify-center min-h-[600px]">
+                  <div className="max-w-2xl mx-auto w-full">
+                    <form className="space-y-8">
+                      <div className="grid grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                          <label className="text-base font-semibold text-foreground ml-1 tracking-wide">First Name</label>
+                          <Input 
+                            placeholder="John" 
+                            className="bg-secondary/30 border-border/50 h-14 rounded-xl focus:border-primary/50 transition-all text-lg"
+                          />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-base font-semibold text-foreground ml-1 tracking-wide">Last Name</label>
+                          <Input 
+                            placeholder="Doe" 
+                            className="bg-secondary/30 border-border/50 h-14 rounded-xl focus:border-primary/50 transition-all text-lg"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <label className="text-base font-semibold text-foreground ml-1 tracking-wide">Email Address</label>
                         <Input 
-                          placeholder="John" 
-                          className="bg-secondary/30 border-border/50 h-12 rounded-xl focus:border-primary/50 transition-all"
+                          type="email"
+                          placeholder="john@example.com" 
+                          className="bg-secondary/30 border-border/50 h-14 rounded-xl focus:border-primary/50 transition-all text-lg"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-foreground ml-1">Last Name</label>
+
+                      <div className="space-y-3">
+                        <label className="text-base font-semibold text-foreground ml-1 tracking-wide">Subject</label>
                         <Input 
-                          placeholder="Doe" 
-                          className="bg-secondary/30 border-border/50 h-12 rounded-xl focus:border-primary/50 transition-all"
+                          placeholder="How can we help?" 
+                          className="bg-secondary/30 border-border/50 h-14 rounded-xl focus:border-primary/50 transition-all text-lg"
                         />
                       </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground ml-1">Email Address</label>
-                      <Input 
-                        type="email"
-                        placeholder="john@example.com" 
-                        className="bg-secondary/30 border-border/50 h-12 rounded-xl focus:border-primary/50 transition-all"
-                      />
-                    </div>
+                      <div className="space-y-3">
+                        <label className="text-base font-semibold text-foreground ml-1 tracking-wide">Message</label>
+                        <Textarea 
+                          placeholder="Tell us more about your inquiry..." 
+                          className="bg-secondary/30 border-border/50 min-h-[200px] rounded-xl focus:border-primary/50 transition-all resize-none text-lg py-4"
+                        />
+                      </div>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground ml-1">Subject</label>
-                      <Input 
-                        placeholder="How can we help?" 
-                        className="bg-secondary/30 border-border/50 h-12 rounded-xl focus:border-primary/50 transition-all"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground ml-1">Message</label>
-                      <Textarea 
-                        placeholder="Tell us more about your inquiry..." 
-                        className="bg-secondary/30 border-border/50 min-h-[150px] rounded-xl focus:border-primary/50 transition-all resize-none"
-                      />
-                    </div>
-
-                    <Button 
-                      className="w-full h-14 bg-primary text-primary-foreground text-lg font-bold rounded-xl glow-primary hover:bg-primary/90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
-                    >
-                      <Send className="w-5 h-5" />
-                      Send Message
-                    </Button>
-                  </form>
+                      <Button 
+                        className="w-full h-16 bg-primary text-primary-foreground text-xl font-extrabold rounded-xl glow-primary hover:bg-primary/90 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 shadow-lg"
+                      >
+                        <Send className="w-6 h-6" />
+                        Send Message
+                      </Button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
