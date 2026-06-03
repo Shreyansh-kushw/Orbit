@@ -116,6 +116,18 @@ async def get_current_user(current_user: CurrentUser):
 
     return current_user
 
+@app.get("/total")
+async def get_total_users(db: Annotated[AsyncSession, Depends(get_db)],):
+    """Returns the total number of registered users on the site."""
+
+    user_count = await db.execute(
+        select(func.count())
+        .select_from(models.User)
+    )
+
+    total = user_count.scalar() or 0
+
+    return total
 
 @app.get("/{user_id}", response_model=UserPublic)
 async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
