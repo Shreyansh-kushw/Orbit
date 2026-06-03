@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Search, TrendingUp, Hash, Filter, Loader2 } from 'lucide-react'
+import { Search, TrendingUp, Hash, Loader2 } from 'lucide-react'
 import { Navbar } from '@/components/orbit/navbar'
 import { Sidebar } from '@/components/orbit/sidebar'
 import { PostCard } from '@/components/orbit/post-card'
@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getPosts } from '@/lib/api'
 import { mapPost } from '@/lib/utils'
-import { PostApiResponse } from '@/lib/api'
 import { Post, User } from '@/lib/schemas'
 import { mapUser } from '@/lib/utils'
 import { getCurrentUser } from '@/lib/auth'
@@ -24,7 +23,6 @@ function ExplorePageContent() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTag, setSelectedTag] = useState(initialTag)
-  const [sortBy, setSortBy] = useState<'trending' | 'latest' | 'top'>('trending')
   const [posts, setPosts] = useState<Post[]>([])
   const [totalPosts, setTotalPosts] = useState(0)
   const [skip, setSkip] = useState(0)
@@ -94,36 +92,13 @@ function ExplorePageContent() {
   // Extract all unique tags from real post data
   const allAvailableTags = useMemo(() => {
     const tagsSet = new Set<string>()
-    // We only have the currently loaded posts, so this might not be complete
-    // In a real app, you might have a separate endpoint for tags
     posts.forEach(post => {
       post.tags?.forEach(tag => tagsSet.add(tag))
     })
-    // If no tags found in posts, use some defaults to keep UI populated
     const defaults = ['AI', 'Technology', 'Programming', 'Science', 'Philosophy', 'Web3', 'Space', 'Future']
     const combined = Array.from(tagsSet)
     return combined.length > 0 ? combined.sort() : defaults
   }, [posts])
-
-  // Derive trending topics from real post data
-  const trendingTopics = useMemo(() => {
-    const tagCounts: Record<string, number> = {}
-    posts.forEach(post => {
-      post.tags?.forEach(tag => {
-        tagCounts[tag] = (tagCounts[tag] || 0) + 1
-      })
-    })
-
-    const trending = Object.entries(tagCounts)
-      .map(([tag, count]) => ({ tag, posts: count }))
-      .sort((a, b) => b.posts - a.posts)
-
-    // Fallback if no tags exist yet
-    if (trending.length === 0) {
-      return allAvailableTags.map(tag => ({ tag, posts: 0 }))
-    }
-    return trending
-  }, [posts, allAvailableTags])
 
   // Filter posts based on search and tag
   const filteredPosts = useMemo(() => posts.filter(post => {
@@ -137,16 +112,6 @@ function ExplorePageContent() {
 
     return matchesSearch && matchesTag
   }), [posts, searchQuery, selectedTag])
-
-  // Sort posts
-  const sortedPosts = useMemo(() => [...filteredPosts].sort((a, b) => {
-    switch (sortBy) {
-      case 'latest':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      default:
-        return 0
-    }
-  }), [filteredPosts, sortBy])
 
   return (
     <div className="min-h-screen bg-background">
@@ -185,7 +150,7 @@ function ExplorePageContent() {
               </div>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -210,71 +175,33 @@ function ExplorePageContent() {
                       selectedTag === tag 
                         ? "bg-primary text-primary-foreground border-primary glow-primary" 
                         : "hover:bg-primary/10 hover:text-primary hover:border-primary/50"
-                      )}
-                      >
-                      <Hash className="w-3 h-3 mr-1" />
-                      {tag}
-                      </Button>
-                      ))}
-                      </div>
+                    )}
+                  >
+                    <Hash className="w-3 h-3 mr-1" />
+                    {tag}
+                  </Button>
+                ))}
+              </div>
+            </div>
 
-                      {/* Sort Options */}
-                      <div className="flex items-center gap-2">
-                      <Filter className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Sort by:</span>
-                      {(['trending', 'latest', 'top'] as const).map(option => (
-                      <Button
-                      key={option}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSortBy(option)}
-                      className={cn(
-                      "text-sm capitalize",
-                      sortBy === option ? "text-primary bg-primary/10" : "text-muted-foreground"
-                      )}
-                      >
-                      {option}
-                      </Button>
-                      ))}
-                      </div>
-                      </div>
-
-                      {/* Trending Topics Cards */}
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      {trendingTopics.slice(0, 5).map((topic, index) => (
-                      <button
-                      key={topic.tag}
-                      onClick={() => handleTagSelect(topic.tag)}
-                      className={cn(
-                      "glass rounded-xl p-4 text-left hover:border-primary/50 transition-all",
-                      selectedTag === topic.tag && "border-primary/50 bg-primary/10 glow-primary-sm"
-                      )}
-                      >
-                      <span className="text-xs text-muted-foreground">#{index + 1} Trending</span>
-                      <p className="font-semibold text-foreground mt-1 capitalize">#{topic.tag}</p>
-                      <p className="text-xs text-accent mt-1">{topic.posts} posts</p>
-                      </button>
-                      ))}
-                      </div>
-
-                      {/* Results */}
-                      <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-foreground">
-                      <span className="capitalize">{selectedTag ? `#${selectedTag}` : 'All Posts'}</span>
-                      <span className="text-muted-foreground font-normal ml-2">
-                      ({totalPosts} results)
-                      </span>
-                      </h2>
-                      </div>
+            {/* Results */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-foreground">
+                  <span className="capitalize">{selectedTag ? `#${selectedTag}` : 'All Posts'}</span>
+                  <span className="text-muted-foreground font-normal ml-2">
+                    ({totalPosts} results)
+                  </span>
+                </h2>
+              </div>
 
               {!posts.length && isLoadingPosts ? (
                 <div className="flex justify-center py-12">
                   <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                 </div>
-              ) : sortedPosts.length > 0 ? (
+              ) : filteredPosts.length > 0 ? (
                 <>
-                  {sortedPosts.map(post => (
+                  {filteredPosts.map(post => (
                     <PostCard key={post.id} post={post} />
                   ))}
                   

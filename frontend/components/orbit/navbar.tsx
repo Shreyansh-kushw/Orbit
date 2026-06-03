@@ -57,7 +57,7 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
     await logout()
     
     // Define pages that are allowed for unauthenticated users
-    const publicRoutes = ['/', '/explore', '/about', '/privacy', '/terms', '/faq']
+    const publicRoutes = ['/', '/explore', '/about', '/privacy', '/terms']
     const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/post/') || pathname.startsWith('/profile/')
     
     if (!isPublicRoute) {

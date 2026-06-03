@@ -39,13 +39,6 @@ export default async function HomePage() {
                 <h1 className="text-xl font-semibold text-foreground">Your Feed</h1>
                 <p className="text-sm text-muted-foreground">Discover discussions from across the ORBIT</p>
               </div>
-              <div className="flex items-center gap-2">
-                <select className="bg-secondary/50 border border-border/50 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary/50">
-                  <option value="latest">Latest</option>
-                  <option value="trending">Trending</option>
-                  <option value="top">Top</option>
-                </select>
-              </div>
             </div>
 
             {/* Posts */}

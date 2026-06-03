@@ -72,8 +72,6 @@ export function Sidebar() {
             <Link href="/about" className="hover:text-primary transition-colors">About</Link>
             <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
-            <Link href="/faq" className="hover:text-primary transition-colors">FAQ</Link>
-            <Link href="/contact" className="hover:text-primary transition-colors">Contact</Link>
           </div>
           <div className="mt-6 pt-4 border-t border-border/30 flex items-center justify-between">
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">

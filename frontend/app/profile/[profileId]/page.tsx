@@ -228,12 +228,14 @@ export default function PublicProfilePage() {
         </div>
 
         {/* Posts */}
-        <Tabs defaultValue="posts" className="w-full">
-          <TabsList className="w-full glass mb-4">
-            <TabsTrigger value="posts" className="flex-1">Posts</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          <div className="flex items-center gap-2 px-2 pb-2 border-b border-border/50">
+            <FileText className="w-5 h-5 text-primary" />
+            <h2 className="text-xl font-bold text-foreground">Posts</h2>
+            <span className="text-muted-foreground font-normal ml-1">({totalPosts})</span>
+          </div>
 
-          <TabsContent value="posts" className="space-y-4">
+          <div className="space-y-4">
             {userPosts.length > 0 ? (
               <>
                 {userPosts.map((post) => (
@@ -291,8 +293,8 @@ export default function PublicProfilePage() {
                 )}
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </main>
     </div>
   )
