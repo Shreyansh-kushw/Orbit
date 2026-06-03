@@ -20,6 +20,7 @@ from backend.app.api.schemas import (
     UserPublic,
     UserUpdate,
     Token,
+    PaginatedResponse,
 )
 
 from backend.app.utils.auth import (
@@ -145,10 +146,24 @@ async def get_user_by_username(
 
 
 @app.get("/{user_id}/posts", response_model=list[PostResponse])
-async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+async def get_user_posts(
+    user_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    skip: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+):
     """Gets all the posts by the selected user"""
 
-    result = await db.execute(select(models.User).where(models.User.id == user_id))
+    posts_count = await db.execute(select(func.count()).select_from(models.Post))
+    total = posts_count.scalar() or 0
+
+    result = await db.execute(
+        select(models.User)
+        .where(models.User.id == user_id)
+        .order_by(models.Post.date_posted.desc())
+        .offset(skip)
+        .limit(limit)
+    )
     user = result.scalars().first()
     if not user:
         raise HTTPException(
@@ -162,7 +177,16 @@ async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_d
         .order_by(models.Post.date_posted.desc()),
     )
     posts = result.scalars().all()
-    return posts
+
+    has_more = skip + len(posts) < total
+
+    return PaginatedResponse(
+        posts=[PostResponse.validate(post) for post in posts],
+        total=total,
+        skip=skip,
+        limit=limit,
+        has_more=has_more,
+    )
 
 
 @app.patch("/{user_id}", response_model=UserPrivate)
