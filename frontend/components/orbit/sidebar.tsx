@@ -1,12 +1,21 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { TrendingUp, Users, BarChart3, Hash, ExternalLink } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { trendingTopics, platformStats, mockUsers } from '@/lib/mock-data'
+import { getTotalUsers, getTotalPosts } from '@/lib/api'
 
 export function Sidebar() {
+  const [totalUsers, setTotalUsers] = useState<number>(0)
+  const [totalPosts, setTotalPosts] = useState<number>(0)
+
+  useEffect(() => {
+    getTotalUsers().then(setTotalUsers).catch(console.error)
+    getTotalPosts().then(setTotalPosts).catch(console.error)
+  }, [])
+
   return (
     <aside className="w-80 flex-shrink-0 hidden lg:block">
       <div className="sticky top-24 space-y-6">
@@ -19,18 +28,18 @@ export function Sidebar() {
             <h3 className="font-bold text-lg text-foreground">Community Pulse</h3>
           </div>
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
                 <p className="text-2xl font-black text-foreground tracking-tight">
-                  {formatNumber(platformStats.totalUsers)}
+                  {formatNumber(totalUsers)}
                 </p>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Explorers</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Total Explorers</p>
               </div>
-              <div className="text-right">
+              <div className="text-center border-l border-border/20">
                 <p className="text-2xl font-black text-foreground tracking-tight">
-                  {formatNumber(platformStats.totalPosts)}
+                  {formatNumber(totalPosts)}
                 </p>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Shared Ideas</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Shared Ideas</p>
               </div>
             </div>
           </div>

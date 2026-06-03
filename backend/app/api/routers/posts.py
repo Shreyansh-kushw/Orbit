@@ -79,6 +79,20 @@ async def create_post(
     return new_post
 
 
+@app.get("/total")
+async def get_total_posts(db: Annotated[AsyncSession, Depends(get_db)],):
+    """Returns the total number of posts on the site."""
+
+    posts_count = await db.execute(
+        select(func.count())
+        .select_from(models.Post)
+    )
+
+    total = posts_count.scalar() or 0
+
+    return total
+
+
 @app.get("/{post_id}", response_model=PostResponse)
 async def get_post(post_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
     """Returns a specific post by its id."""

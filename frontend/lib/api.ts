@@ -95,6 +95,26 @@ export async function getUserByUsername(username: string): Promise<UserPublicApi
     return response.json()
 }
 
+export async function getTotalUsers(): Promise<number> {
+    const response = await fetch(`${API_URL}/api/users/total`)
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch total users")
+    }
+
+    return response.json()
+}
+
+export async function getTotalPosts(): Promise<number> {
+    const response = await fetch(`${API_URL}/api/posts/total`)
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch total posts")
+    }
+
+    return response.json()
+}
+
 export async function getUserPosts(userId: number, skip = 0, limit = 20): Promise<PaginatedApiResponse<PostApiResponse>> {
     const response = await fetch(`${API_URL}/api/users/${userId}/posts?skip=${skip}&limit=${limit}`)
 
