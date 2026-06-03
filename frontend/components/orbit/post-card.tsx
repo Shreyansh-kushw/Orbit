@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { Post } from '@/lib/schemas'
 
@@ -118,7 +119,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
 
       {/* Content */}
       <Link href={`/post/${post.id}`} className="block">
-        <h2 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+        <h2 className="text-lg font-semibold text-foreground mb-2 hover:text-primary transition-colors">
           {post.title}
         </h2>
         <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
@@ -135,13 +136,16 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
       {post.tags && post.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-4">
           {post.tags.map((tag) => (
-            <Link
+            <Badge
               key={tag}
-              href={`/explore?tag=${tag}`}
-              className="text-xs font-medium text-primary hover:underline"
+              variant="bubble"
+              className="px-4 py-1 text-sm font-semibold"
+              asChild
             >
-              #{tag}
-            </Link>
+              <Link href={`/explore?tag=${tag}`}>
+                #{tag}
+              </Link>
+            </Badge>
           ))}
         </div>
       )}
