@@ -49,7 +49,7 @@ export function Sidebar() {
               <Link
                 key={tag}
                 href={`/explore?tag=${tag}`}
-                className="px-4 py-3 rounded-xl bg-secondary/30 border border-border/50 text-sm font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all text-center"
+                className="px-4 py-3 rounded-xl bg-secondary/30 border border-border/50 text-sm font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all text-center capitalize"
               >
                 #{tag}
               </Link>

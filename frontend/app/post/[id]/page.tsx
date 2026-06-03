@@ -186,7 +186,7 @@ export default function PostPage() {
                     <Link
                       key={tag}
                       href={`/explore?tag=${tag}`}
-                      className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20 hover:bg-primary/20 transition-all"
+                      className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20 hover:bg-primary/20 transition-all capitalize"
                     >
                       #{tag}
                     </Link>

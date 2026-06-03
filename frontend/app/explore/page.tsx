@@ -177,67 +177,67 @@ function ExplorePageContent() {
                     size="sm"
                     onClick={() => handleTagSelect(tag)}
                     className={cn(
-                      "rounded-full transition-all",
+                      "rounded-full transition-all capitalize",
                       selectedTag === tag 
                         ? "bg-primary text-primary-foreground border-primary glow-primary" 
                         : "hover:bg-primary/10 hover:text-primary hover:border-primary/50"
-                    )}
-                  >
-                    <Hash className="w-3 h-3 mr-1" />
-                    {tag}
-                  </Button>
-                ))}
-              </div>
+                      )}
+                      >
+                      <Hash className="w-3 h-3 mr-1" />
+                      {tag}
+                      </Button>
+                      ))}
+                      </div>
 
-              {/* Sort Options */}
-              <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Sort by:</span>
-                {(['trending', 'latest', 'top'] as const).map(option => (
-                  <Button
-                    key={option}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSortBy(option)}
-                    className={cn(
+                      {/* Sort Options */}
+                      <div className="flex items-center gap-2">
+                      <Filter className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Sort by:</span>
+                      {(['trending', 'latest', 'top'] as const).map(option => (
+                      <Button
+                      key={option}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSortBy(option)}
+                      className={cn(
                       "text-sm capitalize",
                       sortBy === option ? "text-primary bg-primary/10" : "text-muted-foreground"
-                    )}
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </div>
-            </div>
+                      )}
+                      >
+                      {option}
+                      </Button>
+                      ))}
+                      </div>
+                      </div>
 
-            {/* Trending Topics Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {trendingTopics.slice(0, 5).map((topic, index) => (
-                <button
-                  key={topic.tag}
-                  onClick={() => handleTagSelect(topic.tag)}
-                  className={cn(
-                    "glass rounded-xl p-4 text-left hover:border-primary/50 transition-all",
-                    selectedTag === topic.tag && "border-primary/50 bg-primary/10 glow-primary-sm"
-                  )}
-                >
-                  <span className="text-xs text-muted-foreground">#{index + 1} Trending</span>
-                  <p className="font-semibold text-foreground mt-1">#{topic.tag}</p>
-                  <p className="text-xs text-accent mt-1">{topic.posts} posts</p>
-                </button>
-              ))}
-            </div>
+                      {/* Trending Topics Cards */}
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      {trendingTopics.slice(0, 5).map((topic, index) => (
+                      <button
+                      key={topic.tag}
+                      onClick={() => handleTagSelect(topic.tag)}
+                      className={cn(
+                      "glass rounded-xl p-4 text-left hover:border-primary/50 transition-all",
+                      selectedTag === topic.tag && "border-primary/50 bg-primary/10 glow-primary-sm"
+                      )}
+                      >
+                      <span className="text-xs text-muted-foreground">#{index + 1} Trending</span>
+                      <p className="font-semibold text-foreground mt-1 capitalize">#{topic.tag}</p>
+                      <p className="text-xs text-accent mt-1">{topic.posts} posts</p>
+                      </button>
+                      ))}
+                      </div>
 
-            {/* Results */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-foreground">
-                  {selectedTag ? `#${selectedTag}` : 'All Posts'}
-                  <span className="text-muted-foreground font-normal ml-2">
-                    ({sortedPosts.length} results)
-                  </span>
-                </h2>
-              </div>
+                      {/* Results */}
+                      <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-foreground">
+                      <span className="capitalize">{selectedTag ? `#${selectedTag}` : 'All Posts'}</span>
+                      <span className="text-muted-foreground font-normal ml-2">
+                      ({sortedPosts.length} results)
+                      </span>
+                      </h2>
+                      </div>
 
               {!rawPosts ? (
                 <div className="flex justify-center py-12">

@@ -139,7 +139,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
             <Badge
               key={tag}
               variant="bubble"
-              className="px-4 py-1 text-sm font-semibold"
+              className="px-4 py-1 text-sm font-semibold capitalize"
               asChild
             >
               <Link href={`/explore?tag=${tag}`}>

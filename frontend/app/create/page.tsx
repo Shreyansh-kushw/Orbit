@@ -212,7 +212,7 @@ export default function CreatePostPage() {
                   {tags.map(tag => (
                     <span 
                       key={tag} 
-                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm border border-primary/20"
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm border border-primary/20 capitalize"
                     >
                       #{tag}
                       <button 
@@ -248,18 +248,47 @@ export default function CreatePostPage() {
                     </Button>
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground">
+                
+                {/* Suggested Tags */}
+                <div className="space-y-3">
+                  <p className="text-sm font-semibold text-muted-foreground">Suggested Tags:</p>
+                  <div className="flex flex-wrap gap-2.5">
+                    {['AI', 'Tech', 'Science', 'Philosophy', 'Coding', 'Space', 'Future', 'Web3'].map((suggestedTag) => (
+                      <button
+                        key={suggestedTag}
+                        type="button"
+                        onClick={() => {
+                          if (!tags.includes(suggestedTag) && tags.length < 5) {
+                            setTags([...tags, suggestedTag])
+                          }
+                        }}
+                        disabled={tags.includes(suggestedTag) || tags.length >= 5}
+                        className={cn(
+                          "px-3 py-1.5 rounded-md text-sm border transition-all capitalize",
+                          tags.includes(suggestedTag)
+                            ? "bg-primary/5 text-primary/40 border-primary/10 cursor-not-allowed"
+                            : "bg-secondary/50 text-muted-foreground border-border/50 hover:border-primary/50 hover:text-primary hover:bg-primary/5"
+                        )}
+                        style={{ cursor: tags.includes(suggestedTag) || tags.length >= 5 ? 'not-allowed' : 'pointer' }}
+                      >
+                        #{suggestedTag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-sm text-muted-foreground pt-1">
                   Add up to 5 tags to help people find your post
                 </p>
               </div>
 
               {/* Guidelines */}
-              <div className="bg-secondary/30 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                  <div className="text-sm">
-                    <p className="font-medium text-foreground mb-1">Posting Guidelines</p>
-                    <ul className="text-muted-foreground space-y-1">
+              <div className="bg-secondary/30 rounded-lg p-5">
+                <div className="flex items-start gap-4">
+                  <AlertCircle className="w-6 h-6 text-accent flex-shrink-0 mt-0.5" />
+                  <div className="text-base">
+                    <p className="font-semibold text-foreground mb-2">Posting Guidelines</p>
+                    <ul className="text-muted-foreground space-y-2 list-disc list-inside">
                       <li>Be respectful and constructive in your discussions</li>
                       <li>No spam, self-promotion, or misleading content</li>
                       <li>Give credit when sharing others&apos; ideas</li>
@@ -312,7 +341,7 @@ export default function CreatePostPage() {
                   </h1>
                   <div className="flex flex-wrap gap-2 mb-6">
                     {tags.map(tag => (
-                      <span key={tag} className="text-sm text-primary font-medium">
+                      <span key={tag} className="text-sm text-primary font-medium capitalize">
                         #{tag}
                       </span>
                     ))}
