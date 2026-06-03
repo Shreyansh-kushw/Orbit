@@ -60,29 +60,47 @@ function ExplorePageContent() {
   const posts: Post[] = useMemo(() => rawPosts ? rawPosts.map(mapPost) : [], [rawPosts])
   const user: User | null = rawUser ? mapUser(rawUser) : null
 
-  // Derive trending topics from real post data
-  const trendingTopics = useMemo(() => {
-    const allTags = ['AI', 'Technology', 'Programming', 'Science', 'Philosophy', 'Web3', 'Space', 'Future']
-    return allTags.map(tag => ({
-      tag,
-      posts: posts.filter(p =>
-        p.title.toLowerCase().includes(tag.toLowerCase()) ||
-        p.content.toLowerCase().includes(tag.toLowerCase())
-      ).length
-    })).sort((a, b) => b.posts - a.posts)
+  // Extract all unique tags from real post data
+  const allAvailableTags = useMemo(() => {
+    const tagsSet = new Set<string>()
+    posts.forEach(post => {
+      post.tags?.forEach(tag => tagsSet.add(tag))
+    })
+    // If no tags found in posts, use some defaults to keep UI populated
+    const defaults = ['AI', 'Technology', 'Programming', 'Science', 'Philosophy', 'Web3', 'Space', 'Future']
+    const combined = Array.from(tagsSet)
+    return combined.length > 0 ? combined.sort() : defaults
   }, [posts])
 
-  const allTags = ['AI', 'Technology', 'Programming', 'Science', 'Philosophy', 'Web3', 'Space', 'Future']
+  // Derive trending topics from real post data
+  const trendingTopics = useMemo(() => {
+    const tagCounts: Record<string, number> = {}
+    posts.forEach(post => {
+      post.tags?.forEach(tag => {
+        tagCounts[tag] = (tagCounts[tag] || 0) + 1
+      })
+    })
+
+    const trending = Object.entries(tagCounts)
+      .map(([tag, count]) => ({ tag, posts: count }))
+      .sort((a, b) => b.posts - a.posts)
+
+    // Fallback if no tags exist yet
+    if (trending.length === 0) {
+      return allAvailableTags.map(tag => ({ tag, posts: 0 }))
+    }
+    return trending
+  }, [posts, allAvailableTags])
 
   // Filter posts based on search and tag
   const filteredPosts = useMemo(() => posts.filter(post => {
     const matchesSearch = searchQuery === '' ||
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchQuery.toLowerCase())
+      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
 
     const matchesTag = selectedTag === '' ||
-      post.title.toLowerCase().includes(selectedTag.toLowerCase()) ||
-      post.content.toLowerCase().includes(selectedTag.toLowerCase())
+      post.tags?.some(tag => tag.toLowerCase() === selectedTag.toLowerCase())
 
     return matchesSearch && matchesTag
   }), [posts, searchQuery, selectedTag])
@@ -152,7 +170,7 @@ function ExplorePageContent() {
                 >
                   All Topics
                 </Button>
-                {allTags.map(tag => (
+                {allAvailableTags.map(tag => (
                   <Button
                     key={tag}
                     variant="outline"

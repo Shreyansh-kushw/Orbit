@@ -179,6 +179,21 @@ export default function PostPage() {
                 {post.title}
               </h1>
 
+              {/* Tags */}
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {post.tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={`/explore?tag=${tag}`}
+                      className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20 hover:bg-primary/20 transition-all"
+                    >
+                      #{tag}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
               {/* Post Meta */}
               <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
                 <span className="flex items-center gap-1">

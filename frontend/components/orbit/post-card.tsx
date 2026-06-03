@@ -131,6 +131,21 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
         )}
       </Link>
 
+      {/* Tags */}
+      {post.tags && post.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-4">
+          {post.tags.map((tag) => (
+            <Link
+              key={tag}
+              href={`/explore?tag=${tag}`}
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              #{tag}
+            </Link>
+          ))}
+        </div>
+      )}
+
       {/* Actions */}
       {/* <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border/50">
         <button
