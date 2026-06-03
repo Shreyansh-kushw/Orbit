@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -145,7 +145,7 @@ async def get_user_by_username(
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
-@app.get("/{user_id}/posts", response_model=list[PostResponse])
+@app.get("/{user_id}/posts", response_model=PaginatedResponse)
 async def get_user_posts(
     user_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
@@ -154,27 +154,29 @@ async def get_user_posts(
 ):
     """Gets all the posts by the selected user"""
 
-    posts_count = await db.execute(select(func.count()).select_from(models.Post))
+    posts_count = await db.execute(
+        select(func.count())
+        .where(models.Post.user_id == user_id)
+        .select_from(models.Post)
+    )
     total = posts_count.scalar() or 0
 
-    result = await db.execute(
-        select(models.User)
-        .where(models.User.id == user_id)
-        .order_by(models.Post.date_posted.desc())
-        .offset(skip)
-        .limit(limit)
-    )
+    result = await db.execute(select(models.User).where(models.User.id == user_id))
     user = result.scalars().first()
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
+
     result = await db.execute(
         select(models.Post)
         .options(selectinload(models.Post.author))
         .where(models.Post.user_id == user_id)
-        .order_by(models.Post.date_posted.desc()),
+        .order_by(models.Post.date_posted.desc())
+        .offset(skip)
+        .limit(limit),
     )
     posts = result.scalars().all()
 

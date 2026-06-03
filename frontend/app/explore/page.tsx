@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Search, TrendingUp, Hash, Filter } from 'lucide-react'
+import { Search, TrendingUp, Hash, Filter, Loader2 } from 'lucide-react'
 import { Navbar } from '@/components/orbit/navbar'
 import { Sidebar } from '@/components/orbit/sidebar'
 import { PostCard } from '@/components/orbit/post-card'
@@ -25,9 +25,15 @@ function ExplorePageContent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTag, setSelectedTag] = useState(initialTag)
   const [sortBy, setSortBy] = useState<'trending' | 'latest' | 'top'>('trending')
-  const [rawPosts, setRawPosts] = useState<any[] | null>(null)
+  const [posts, setPosts] = useState<Post[]>([])
+  const [totalPosts, setTotalPosts] = useState(0)
+  const [skip, setSkip] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true)
   const [rawUser, setRawUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
+
+  const limit = 10
 
   const handleTagSelect = (tag: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -44,11 +50,37 @@ function ExplorePageContent() {
     setSelectedTag(initialTag)
   }, [initialTag])
 
+  const fetchPosts = async (currentSkip: number, reset = false) => {
+    setIsLoadingPosts(true)
+    try {
+      const response = await getPosts(currentSkip, limit)
+      const newPosts = response.posts.map(mapPost)
+      
+      if (reset) {
+        setPosts(newPosts)
+      } else {
+        setPosts(prev => [...prev, ...newPosts])
+      }
+      
+      setTotalPosts(response.total)
+      setHasMore(response.has_more)
+      setSkip(currentSkip)
+    } catch (error) {
+      console.error("Error fetching posts:", error)
+    } finally {
+      setIsLoadingPosts(false)
+    }
+  }
+
   useEffect(() => {
-    getPosts().then((posts) => {
-      if (posts) setRawPosts(posts)
-    })
+    fetchPosts(0, true)
   }, [])
+
+  const handleLoadMore = () => {
+    if (hasMore && !isLoadingPosts) {
+      fetchPosts(skip + limit)
+    }
+  }
 
   useEffect(() => {
     getCurrentUser().then((user) => {
@@ -57,12 +89,13 @@ function ExplorePageContent() {
     })
   }, [])
 
-  const posts: Post[] = useMemo(() => rawPosts ? rawPosts.map(mapPost) : [], [rawPosts])
   const user: User | null = rawUser ? mapUser(rawUser) : null
 
   // Extract all unique tags from real post data
   const allAvailableTags = useMemo(() => {
     const tagsSet = new Set<string>()
+    // We only have the currently loaded posts, so this might not be complete
+    // In a real app, you might have a separate endpoint for tags
     posts.forEach(post => {
       post.tags?.forEach(tag => tagsSet.add(tag))
     })
@@ -108,12 +141,8 @@ function ExplorePageContent() {
   // Sort posts
   const sortedPosts = useMemo(() => [...filteredPosts].sort((a, b) => {
     switch (sortBy) {
-      // case 'trending':
-      //   return (b.likes + b.comments * 2) - (a.likes + a.comments * 2)
       case 'latest':
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      // case 'top':
-      //   return b.likes - a.likes
       default:
         return 0
     }
@@ -239,14 +268,36 @@ function ExplorePageContent() {
                       </h2>
                       </div>
 
-              {!rawPosts ? (
+              {!posts.length && isLoadingPosts ? (
                 <div className="flex justify-center py-12">
                   <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                 </div>
               ) : sortedPosts.length > 0 ? (
-                sortedPosts.map(post => (
-                  <PostCard key={post.id} post={post} />
-                ))
+                <>
+                  {sortedPosts.map(post => (
+                    <PostCard key={post.id} post={post} />
+                  ))}
+                  
+                  {hasMore && (
+                    <div className="flex justify-center pt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={handleLoadMore}
+                        disabled={isLoadingPosts}
+                        className="glass hover:bg-primary/10"
+                      >
+                        {isLoadingPosts ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          'Load More Posts'
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="glass rounded-xl p-12 text-center">
                   <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />

@@ -10,7 +10,8 @@ import { User } from '@/lib/schemas'
 
 export default async function HomePage() {
 
-  const rawPosts: PostApiResponse[] = await getPosts();
+  const response = await getPosts(0, 20);
+  const rawPosts = response.posts;
   const posts = rawPosts.map(mapPost)
 
   const rawUser = await getCurrentUser()

@@ -32,9 +32,15 @@ export default function PublicProfilePage() {
   const [user, setUser] = useState<UserPublicApiResponse | null>(null)
   const [currentUser, setCurrentUser] = useState<UserPublicApiResponse | null>(null)
   const [userPosts, setUserPosts] = useState<PostApiResponse[]>([])
+  const [totalPosts, setTotalPosts] = useState(0)
+  const [skip, setSkip] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
+  const limit = 10
+
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true)
@@ -48,8 +54,11 @@ export default function PublicProfilePage() {
         setUser(profileUser)
         setCurrentUser(loggedInUser)
         
-        const posts = await getUserPosts(profileUser.id)
-        setUserPosts(posts)
+        const response = await getUserPosts(profileUser.id, 0, limit)
+        setUserPosts(response.posts)
+        setTotalPosts(response.total)
+        setHasMore(response.has_more)
+        setSkip(0)
         
       } catch (err: any) {
         console.error("Error fetching profile data:", err)
@@ -63,6 +72,24 @@ export default function PublicProfilePage() {
       fetchData()
     }
   }, [id])
+
+  const handleLoadMore = async () => {
+    if (!user || !hasMore || isLoadingMore) return
+
+    setIsLoadingMore(true)
+    try {
+      const nextSkip = skip + limit
+      const response = await getUserPosts(user.id, nextSkip, limit)
+      
+      setUserPosts(prev => [...prev, ...response.posts])
+      setHasMore(response.has_more)
+      setSkip(nextSkip)
+    } catch (err) {
+      console.error("Error loading more posts:", err)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
 
   const isOwnProfile = user && currentUser && user.id === currentUser.id
   
@@ -204,24 +231,46 @@ export default function PublicProfilePage() {
 
           <TabsContent value="posts" className="space-y-4">
             {userPosts.length > 0 ? (
-              userPosts.map((post) => (
-                <PostCard 
-                  key={post.id} 
-                  post={{
-                    id: post.id,
-                    title: post.title,
-                    content: post.content,
-                    author: {
-                      id: post.author.id,
-                      username: post.author.username,
-                      displayName: post.author.name,
-                      avatar: post.author.image_path,
-                    },
-                    createdAt: new Date(post.date_posted),
-                    tags: post.tags ? post.tags.split(',') : []
-                  }} 
-                />
-              ))
+              <>
+                {userPosts.map((post) => (
+                  <PostCard 
+                    key={post.id} 
+                    post={{
+                      id: post.id,
+                      title: post.title,
+                      content: post.content,
+                      author: {
+                        id: post.author.id,
+                        username: post.author.username,
+                        displayName: post.author.name,
+                        avatar: post.author.image_path,
+                      },
+                      createdAt: new Date(post.date_posted),
+                      tags: post.tags ? post.tags.split(',') : []
+                    }} 
+                  />
+                ))}
+
+                {hasMore && (
+                  <div className="flex justify-center pt-4">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleLoadMore}
+                      disabled={isLoadingMore}
+                      className="glass hover:bg-primary/10"
+                    >
+                      {isLoadingMore ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        'Load More Posts'
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="glass rounded-xl p-12 text-center">
                 <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />

@@ -22,6 +22,14 @@ export interface PostApiResponse {
     author: UserPublicApiResponse
 }
 
+export interface PaginatedApiResponse<T> {
+    posts: T[]
+    total: number
+    skip: number
+    limit: number
+    has_more: boolean
+}
+
 export async function getMe(): Promise<UserPublicApiResponse | null> {
     const token = Cookies.get('access_token')
     if (!token) return null
@@ -41,8 +49,8 @@ export async function getMe(): Promise<UserPublicApiResponse | null> {
     }
 }
 
-export async function getPosts(): Promise<PostApiResponse[]> {
-    const response = await fetch(`${API_URL}/api/posts`)
+export async function getPosts(skip = 0, limit = 20): Promise<PaginatedApiResponse<PostApiResponse>> {
+    const response = await fetch(`${API_URL}/api/posts?skip=${skip}&limit=${limit}`)
 
     if (!response.ok) {
         throw new Error("Failed to fetch posts")
@@ -75,23 +83,20 @@ export async function getUserById(id: string | number): Promise<UserPublicApiRes
 }
 
 export async function getUserByUsername(username: string): Promise<UserPublicApiResponse> {
-    // Search all posts to find the user ID if they've posted anything
-    try {
-        const posts = await getPosts()
-        const postWithUser = posts.find(p => p.author.username.toLowerCase() === username.toLowerCase())
-        
-        if (postWithUser) {
-            return postWithUser.author
+    const response = await fetch(`${API_URL}/api/users/@${username}`)
+
+    if (!response.ok) {
+        if (response.status === 404) {
+            throw new Error("User not found")
         }
-    } catch (e) {
-        console.error("Search by username failed:", e)
+        throw new Error("Failed to fetch user profile")
     }
 
-    throw new Error("User not found")
+    return response.json()
 }
 
-export async function getUserPosts(userId: number): Promise<PostApiResponse[]> {
-    const response = await fetch(`${API_URL}/api/users/${userId}/posts`)
+export async function getUserPosts(userId: number, skip = 0, limit = 20): Promise<PaginatedApiResponse<PostApiResponse>> {
+    const response = await fetch(`${API_URL}/api/users/${userId}/posts?skip=${skip}&limit=${limit}`)
 
     if (!response.ok) {
         throw new Error("Failed to fetch user posts")
