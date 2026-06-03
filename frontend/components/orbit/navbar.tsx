@@ -148,7 +148,7 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 glass">
                   <DropdownMenuItem asChild>
-                    <Link href={`/profile/${user.id}`} className="flex items-center gap-2 cursor-pointer">
+                    <Link href={`/profile/@${currentUser.username}`} className="flex items-center gap-2 cursor-pointer">
                       <User className="w-4 h-4" />
                       <span>My Profile</span>
                     </Link>

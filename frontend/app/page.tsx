@@ -1,9 +1,8 @@
 import { Navbar } from '@/components/orbit/navbar'
 import { Sidebar } from '@/components/orbit/sidebar'
-import { PostCard } from '@/components/orbit/post-card'
+import { PostFeed } from '@/components/orbit/post-feed'
 import { getPosts } from '@/lib/api'
 import { mapPost, mapUser } from '@/lib/utils'
-import { PostApiResponse } from '@/lib/api'
 import { getCurrentUser } from '@/lib/auth'
 import { User } from '@/lib/schemas'
 
@@ -13,6 +12,7 @@ export default async function HomePage() {
   const response = await getPosts(0, 20);
   const rawPosts = response.posts;
   const posts = rawPosts.map(mapPost)
+  const hasMore = response.has_more;
 
   const rawUser = await getCurrentUser()
   let user: User | null;
@@ -49,9 +49,7 @@ export default async function HomePage() {
             </div>
 
             {/* Posts */}
-            {posts.map((post: any) => (
-              <PostCard key={post.id} post={post} />
-            ))}
+            <PostFeed initialPosts={posts} initialHasMore={hasMore} />
           </div>
 
           {/* Right Sidebar */}

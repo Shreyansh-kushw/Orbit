@@ -129,14 +129,14 @@ async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
-@app.get("/@{username}", response_model=UserPublic)
+@app.get("/u/{username}", response_model=UserPublic)
 async def get_user_by_username(
     username: str, db: Annotated[AsyncSession, Depends(get_db)]
 ):
     """Fetches the profile of a user by their username"""
 
     result = await db.execute(
-        select(models.User).where(models.User.username == username)
+        select(models.User).where(func.lower(models.User.username) == username.lower())
     )
     user = result.scalars().first()
 

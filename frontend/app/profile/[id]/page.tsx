@@ -18,7 +18,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
-  getUserById, 
+  getUserById,
+  getUserByUsername,
   getUserPosts, 
   getMe, 
   UserPublicApiResponse, 
@@ -27,7 +28,7 @@ import {
 
 export default function PublicProfilePage() {
   const params = useParams()
-  const id = params.id as string
+  const idOrUsername = params.id as string
   
   const [user, setUser] = useState<UserPublicApiResponse | null>(null)
   const [currentUser, setCurrentUser] = useState<UserPublicApiResponse | null>(null)
@@ -46,8 +47,13 @@ export default function PublicProfilePage() {
       setIsLoading(true)
       setError(null)
       try {
+        const decodedParam = decodeURIComponent(idOrUsername)
+        const isUsername = decodedParam.startsWith('@')
+        
         const [profileUser, loggedInUser] = await Promise.all([
-          getUserById(id),
+          isUsername
+            ? getUserByUsername(decodedParam.substring(1))
+            : getUserById(decodedParam),
           getMe()
         ])
         
@@ -68,10 +74,10 @@ export default function PublicProfilePage() {
       }
     }
 
-    if (id) {
+    if (idOrUsername) {
       fetchData()
     }
-  }, [id])
+  }, [idOrUsername])
 
   const handleLoadMore = async () => {
     if (!user || !hasMore || isLoadingMore) return

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { 
   ThumbsUp, 
   ThumbsDown, 
@@ -74,14 +75,16 @@ export function CommentItem({ comment, depth = 0 }: CommentItemProps) {
       <div className="py-4">
         {/* Comment Header */}
         <div className="flex items-center gap-3 mb-2">
-          <Avatar className="w-8 h-8">
-            <AvatarImage src={comment.author.avatar} alt={comment.author.displayName} />
-            <AvatarFallback>{comment.author.displayName[0]}</AvatarFallback>
-          </Avatar>
+          <Link href={`/profile/@${comment.author.username}`}>
+            <Avatar className="w-8 h-8">
+              <AvatarImage src={comment.author.avatar} alt={comment.author.displayName} />
+              <AvatarFallback>{comment.author.displayName[0]}</AvatarFallback>
+            </Avatar>
+          </Link>
           <div className="flex items-center gap-2">
-            <span className="font-medium text-sm text-foreground">
+            <Link href={`/profile/@${comment.author.username}`} className="font-medium text-sm text-foreground hover:text-primary transition-colors">
               {comment.author.displayName}
-            </span>
+            </Link>
             <span className="text-xs text-muted-foreground">
               @{comment.author.username}
             </span>

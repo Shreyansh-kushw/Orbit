@@ -83,7 +83,7 @@ export async function getUserById(id: string | number): Promise<UserPublicApiRes
 }
 
 export async function getUserByUsername(username: string): Promise<UserPublicApiResponse> {
-    const response = await fetch(`${API_URL}/api/users/@${username}`)
+    const response = await fetch(`${API_URL}/api/users/u/${encodeURIComponent(username)}`)
 
     if (!response.ok) {
         if (response.status === 404) {

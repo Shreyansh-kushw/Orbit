@@ -263,7 +263,7 @@ function ExplorePageContent() {
                       <h2 className="text-lg font-semibold text-foreground">
                       <span className="capitalize">{selectedTag ? `#${selectedTag}` : 'All Posts'}</span>
                       <span className="text-muted-foreground font-normal ml-2">
-                      ({sortedPosts.length} results)
+                      ({totalPosts} results)
                       </span>
                       </h2>
                       </div>
@@ -279,12 +279,13 @@ function ExplorePageContent() {
                   ))}
                   
                   {hasMore && (
-                    <div className="flex justify-center pt-4">
+                    <div className="flex justify-center pt-8 pb-4">
                       <Button 
-                        variant="outline" 
+                        variant="secondary"
+                        size="lg"
                         onClick={handleLoadMore}
                         disabled={isLoadingPosts}
-                        className="glass hover:bg-primary/10"
+                        className="min-w-[200px] border border-white/10 shadow-lg hover:border-primary/50 transition-all"
                       >
                         {isLoadingPosts ? (
                           <>
