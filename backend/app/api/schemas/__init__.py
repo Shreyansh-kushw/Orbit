@@ -81,6 +81,15 @@ class PostResponse(PostBase):
     date_posted: datetime
     author: UserPublic
 
+class PaginatedResponse(BaseModel):
+    """Post class for the paginated post response"""
+
+    posts: list[PostResponse]
+    total: int
+    skip: int
+    limit: int
+    has_more: bool
+
 
 # Token model
 
