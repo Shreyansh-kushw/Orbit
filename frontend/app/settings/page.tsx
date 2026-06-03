@@ -4,14 +4,11 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { 
   Calendar, 
-  Users, 
   FileText, 
-  Heart, 
   Eye,
   TrendingUp,
   ArrowLeft,
   Lock,
-  Bell,
   Shield,
   Trash2,
   Save,
@@ -55,14 +52,6 @@ export default function SettingsPage() {
     confirmPassword: '',
   })
 
-  const [notifications, setNotifications] = useState({
-    emailNotifications: true,
-    newFollowers: true,
-    postLikes: true,
-    comments: true,
-    mentions: true,
-  })
-
   const [privacy, setPrivacy] = useState({
     publicProfile: true,
     showEmail: false,
@@ -73,7 +62,6 @@ export default function SettingsPage() {
 
   // Get user's posts and drafts
   const userPosts = mockPosts.filter(p => p.author.username === currentUser.username)
-  const savedPosts = mockPosts.slice(0, 2) // Mock saved posts
 
   const handleSaveProfile = async () => {
     setIsSaving(true)
@@ -158,7 +146,6 @@ export default function SettingsPage() {
             <Tabs defaultValue="posts" className="w-full">
               <TabsList className="w-full glass mb-6 flex-wrap h-auto gap-1 p-1">
                 <TabsTrigger value="posts" className="flex-1">My Posts</TabsTrigger>
-                <TabsTrigger value="saved" className="flex-1">Saved</TabsTrigger>
                 <TabsTrigger value="settings" className="flex-1">Settings</TabsTrigger>
               </TabsList>
 
@@ -184,24 +171,6 @@ export default function SettingsPage() {
                     <Button asChild className="bg-primary hover:bg-primary/90">
                       <Link href="/create">Create Your First Post</Link>
                     </Button>
-                  </div>
-                )}
-              </TabsContent>
-
-              {/* Saved Posts Tab */}
-              <TabsContent value="saved" className="space-y-4">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Saved Posts</h3>
-                {savedPosts.length > 0 ? (
-                  savedPosts.map((post) => (
-                    <PostCard key={post.id} post={post} />
-                  ))
-                ) : (
-                  <div className="glass rounded-xl p-12 text-center">
-                    <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-foreground mb-2">No saved posts</h3>
-                    <p className="text-muted-foreground">
-                      Posts you save will appear here for easy access.
-                    </p>
                   </div>
                 )}
               </TabsContent>
@@ -305,28 +274,6 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <Button variant="outline">Update Password</Button>
-                  </div>
-                </div>
-
-                {/* Notifications */}
-                <div className="glass rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <Bell className="w-5 h-5" />
-                    Notification Settings
-                  </h3>
-                  <div className="space-y-4">
-                    {Object.entries(notifications).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between">
-                        <Label htmlFor={key} className="text-foreground cursor-pointer">
-                          {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                        </Label>
-                        <Switch
-                          id={key}
-                          checked={value}
-                          onCheckedChange={(checked) => setNotifications({ ...notifications, [key]: checked })}
-                        />
-                      </div>
-                    ))}
                   </div>
                 </div>
 

@@ -66,7 +66,7 @@ export default async function ContactPage() {
                   </div>
 
                   <div className="mt-12 md:mt-0">
-                    <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-4">Follow Us</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-4">Connect With Us</p>
                     <div className="flex gap-4">
                       {['X', 'GitHub', 'Discord'].map((platform) => (
                         <div key={platform} className="text-sm font-medium text-primary hover:underline cursor-pointer">

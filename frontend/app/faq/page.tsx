@@ -48,7 +48,7 @@ export default async function FAQPage() {
         },
         {
           q: "What happens when I delete my account?",
-          a: "Deletion is permanent. All your posts, comments, and profile data will be purged from our active databases. Some data may persist in encrypted backups for a short period before final deletion."
+          a: "Deletion is permanent. All your posts and profile data will be purged from our active databases. Some data may persist in encrypted backups for a short period before final deletion."
         }
       ]
     },
@@ -58,7 +58,7 @@ export default async function FAQPage() {
       questions: [
         {
           q: "How does the 'Explore' algorithm work?",
-          a: "ORBIT's algorithm is designed to surface 'Trending' content based on recent engagement velocity—likes, comments, and shares—rather than just sheer volume, giving new voices a chance to be heard."
+          a: "ORBIT's algorithm is designed to surface 'Trending' content based on recent engagement and sharing activity, giving new voices a chance to be heard."
         },
         {
           q: "Can I format my posts with Markdown?",

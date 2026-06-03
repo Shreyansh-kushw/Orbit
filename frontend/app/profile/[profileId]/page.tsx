@@ -5,12 +5,11 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { 
   Calendar, 
-  Users,
   FileText, 
-  Heart, 
   ArrowLeft,
   Settings,
-  Loader2
+  Loader2,
+  User
 } from 'lucide-react'
 import { Navbar } from '@/components/orbit/navbar'
 import { PostCard } from '@/components/orbit/post-card'
@@ -144,7 +143,7 @@ export default function PublicProfilePage() {
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="glass rounded-xl p-8 max-w-md w-full text-center">
             <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users className="w-8 h-8" />
+              <User className="w-8 h-8" />
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-2">User Not Found</h2>
             <p className="text-muted-foreground mb-6">
@@ -232,7 +231,6 @@ export default function PublicProfilePage() {
         <Tabs defaultValue="posts" className="w-full">
           <TabsList className="w-full glass mb-4">
             <TabsTrigger value="posts" className="flex-1">Posts</TabsTrigger>
-            <TabsTrigger value="liked" className="flex-1">Liked</TabsTrigger>
           </TabsList>
 
           <TabsContent value="posts" className="space-y-4">
@@ -293,16 +291,6 @@ export default function PublicProfilePage() {
                 )}
               </div>
             )}
-          </TabsContent>
-
-          <TabsContent value="liked" className="space-y-4">
-            <div className="glass rounded-xl p-12 text-center">
-              <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">Liked posts</h3>
-              <p className="text-muted-foreground">
-                Posts that {isOwnProfile ? "you've" : `${user.name} has`} liked will appear here.
-              </p>
-            </div>
           </TabsContent>
         </Tabs>
       </main>

@@ -6,7 +6,6 @@ import { useRouter, usePathname } from 'next/navigation'
 import {
   Home,
   Compass,
-  Bell,
   PenSquare,
   Search,
   LogOut,
@@ -90,7 +89,6 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
             <NavLink href="/explore" icon={<Compass className="w-4 h-4" />} label="Explore" />
             {isAuthenticated && (
               <>
-                <NavLink href="/notifications" icon={<Bell className="w-4 h-4" />} label="Notifications" badge={3} />
                 <NavLink href="/create" icon={<PenSquare className="w-4 h-4" />} label="Create" />
               </>
             )}
@@ -200,7 +198,6 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
               <MobileNavLink href="/explore" icon={<Compass className="w-4 h-4" />} label="Explore" onClick={() => setIsMobileMenuOpen(false)} />
               {isAuthenticated && (
                 <>
-                  <MobileNavLink href="/notifications" icon={<Bell className="w-4 h-4" />} label="Notifications" onClick={() => setIsMobileMenuOpen(false)} />
                   <MobileNavLink href="/create" icon={<PenSquare className="w-4 h-4" />} label="Create Post" onClick={() => setIsMobileMenuOpen(false)} />
                 </>
               )}

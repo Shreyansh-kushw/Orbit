@@ -40,7 +40,7 @@ export default async function PrivacyPage() {
                     </div>
                     <ul className="list-disc pl-5 space-y-2 text-sm">
                       <li>Account Information: Username, email, and profile details.</li>
-                      <li>Content: Posts, comments, and media you upload to the platform.</li>
+                      <li>Content: Posts and media you upload to the platform.</li>
                       <li>Usage Data: How you interact with the platform to improve our services.</li>
                       <li>Device Information: IP address, browser type, and operating system.</li>
                     </ul>

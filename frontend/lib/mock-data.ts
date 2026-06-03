@@ -16,23 +16,6 @@ export interface Post {
   title: string
   content: string
   createdAt: string
-  likes: number
-  dislikes: number
-  comments: number
-  isLiked?: boolean
-  isDisliked?: boolean
-}
-
-export interface Comment {
-  id: string
-  author: User
-  content: string
-  createdAt: string
-  upvotes: number
-  downvotes: number
-  replies?: Comment[]
-  isUpvoted?: boolean
-  isDownvoted?: boolean
 }
 
 export const mockUsers: User[] = [
@@ -96,9 +79,6 @@ What excites me most is the democratization of AI. Tools that were once only ava
 
 The key challenges ahead include improving efficiency, reducing hallucinations, and developing better alignment techniques. But I'm optimistic that the collaborative nature of the AI research community will help us overcome these obstacles.`,
     createdAt: '2024-12-15T10:30:00Z',
-    likes: 1247,
-    dislikes: 23,
-    comments: 89,
   },
   {
     id: '2',
@@ -116,9 +96,6 @@ Here are the key benefits I've experienced:
 
 The learning curve is real, but it's worth it. Start with strict mode enabled from day one – you'll thank yourself later.`,
     createdAt: '2024-12-14T15:45:00Z',
-    likes: 892,
-    dislikes: 45,
-    comments: 156,
   },
   {
     id: '3',
@@ -132,9 +109,6 @@ The challenge is staying ahead of reality. When you can watch live streams of ro
 
 The opportunity is in exploring the human dimension. Technology might be advancing rapidly, but human nature remains constant. The best science fiction has always been about people, and that's more true than ever.`,
     createdAt: '2024-12-13T09:15:00Z',
-    likes: 2341,
-    dislikes: 12,
-    comments: 234,
   },
   {
     id: '4',
@@ -148,9 +122,6 @@ The current state of quantum computing is often called the "NISQ era" – Noisy 
 
 Real quantum advantage – solving problems that are genuinely impossible for classical computers – is still years away for most practical applications. But the field is progressing rapidly, and the foundational research happening now will pay dividends for decades.`,
     createdAt: '2024-12-12T14:20:00Z',
-    likes: 1567,
-    dislikes: 34,
-    comments: 178,
   },
   {
     id: '5',
@@ -170,64 +141,6 @@ I believe decentralization is most valuable for systems that:
 
 Not everything needs to be decentralized. But for the things that do, it's a powerful tool for building a more resilient and equitable world.`,
     createdAt: '2024-12-11T11:00:00Z',
-    likes: 678,
-    dislikes: 89,
-    comments: 234,
-  },
-]
-
-export const mockComments: Comment[] = [
-  {
-    id: '1',
-    author: mockUsers[1],
-    content: 'This is such an insightful analysis! I particularly appreciate the nuanced take on the current limitations while maintaining optimism about the future.',
-    createdAt: '2024-12-15T11:30:00Z',
-    upvotes: 45,
-    downvotes: 2,
-    replies: [
-      {
-        id: '1-1',
-        author: mockUsers[0],
-        content: 'Thanks for the kind words! I think it\'s important to be realistic about where we are while still being excited about where we\'re going.',
-        createdAt: '2024-12-15T12:15:00Z',
-        upvotes: 23,
-        downvotes: 0,
-      },
-    ],
-  },
-  {
-    id: '2',
-    author: mockUsers[2],
-    content: 'I\'d love to see a follow-up post diving deeper into the specific architectural innovations you mentioned. State space models in particular seem fascinating.',
-    createdAt: '2024-12-15T13:00:00Z',
-    upvotes: 67,
-    downvotes: 1,
-  },
-  {
-    id: '3',
-    author: mockUsers[3],
-    content: 'Great points overall, but I think you\'re underselling the alignment challenges. The risks are more significant than many people realize.',
-    createdAt: '2024-12-15T14:30:00Z',
-    upvotes: 34,
-    downvotes: 8,
-    replies: [
-      {
-        id: '3-1',
-        author: mockUsers[0],
-        content: 'That\'s a fair criticism. I didn\'t want to make the post too long, but alignment definitely deserves its own deep dive.',
-        createdAt: '2024-12-15T15:00:00Z',
-        upvotes: 19,
-        downvotes: 0,
-      },
-      {
-        id: '3-2',
-        author: mockUsers[4],
-        content: 'I think the key is that we need both technical solutions and governance frameworks. Neither alone is sufficient.',
-        createdAt: '2024-12-15T15:30:00Z',
-        upvotes: 28,
-        downvotes: 1,
-      },
-    ],
   },
 ]
 
