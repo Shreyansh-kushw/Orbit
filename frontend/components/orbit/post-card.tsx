@@ -3,15 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import {
-  ThumbsUp,
-  ThumbsDown,
-  MessageCircle,
-  UserPlus,
   Clock,
   ChevronRight
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { Post } from '@/lib/schemas'
@@ -22,45 +17,12 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, showFullContent = false }: PostCardProps) {
-  // const [isLiked, setIsLiked] = useState(post.isLiked || false)
-  // const [isDisliked, setIsDisliked] = useState(post.isDisliked || false)
-  // const [likes, setLikes] = useState(post.likes)
-  // const [dislikes, setDislikes] = useState(post.dislikes)
-  // const [isFollowing, setIsFollowing] = useState(post.author.isFollowing || false)
 
   const MAX_PREVIEW_LENGTH = 400
   const shouldTruncate = !showFullContent && post.content.length > MAX_PREVIEW_LENGTH
   const displayContent = shouldTruncate
     ? post.content.slice(0, MAX_PREVIEW_LENGTH) + '...'
     : post.content
-
-  // const handleLike = () => {
-  //   if (isLiked) {
-  //     setIsLiked(false)
-  //     setLikes(likes - 1)
-  //   } else {
-  //     setIsLiked(true)
-  //     setLikes(likes + 1)
-  //     if (isDisliked) {
-  //       setIsDisliked(false)
-  //       setDislikes(dislikes - 1)
-  //     }
-  //   }
-  // }
-
-  // const handleDislike = () => {
-  //   if (isDisliked) {
-  //     setIsDisliked(false)
-  //     setDislikes(dislikes - 1)
-  //   } else {
-  //     setIsDisliked(true)
-  //     setDislikes(dislikes + 1)
-  //     if (isLiked) {
-  //       setIsLiked(false)
-  //       setLikes(likes - 1)
-  //     }
-  //   }
-  // }
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -101,20 +63,6 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
             </div>
           </div>
         </div>
-        {/* <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsFollowing(!isFollowing)}
-          className={cn(
-            "text-xs transition-all",
-            isFollowing 
-              ? "bg-primary/10 border-primary/50 text-primary" 
-              : "border-border hover:border-primary/50 hover:text-primary"
-          )}
-        >
-          <UserPlus className="w-3 h-3 mr-1" />
-          {isFollowing ? 'Following' : 'Follow'}
-        </Button> */}
       </div>
 
       {/* Content */}
@@ -149,43 +97,6 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
           ))}
         </div>
       )}
-
-      {/* Actions */}
-      {/* <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border/50">
-        <button
-          onClick={handleLike}
-          className={cn(
-            "flex items-center gap-2 text-sm transition-colors",
-            isLiked ? "text-success" : "text-muted-foreground hover:text-success"
-          )}
-        >
-          <ThumbsUp className={cn("w-4 h-4", isLiked && "fill-current")} />
-          <span>{formatNumber(likes)}</span>
-        </button>
-        <button
-          onClick={handleDislike}
-          className={cn(
-            "flex items-center gap-2 text-sm transition-colors",
-            isDisliked ? "text-destructive" : "text-muted-foreground hover:text-destructive"
-          )}
-        >
-          <ThumbsDown className={cn("w-4 h-4", isDisliked && "fill-current")} />
-          <span>{formatNumber(dislikes)}</span>
-        </button>
-        <Link
-          href={`/post/${post.id}`}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors"
-        >
-          <MessageCircle className="w-4 h-4" />
-          <span>{formatNumber(post.comments)} comments</span>
-        </Link>
-        <Link
-          href={`/profile/${post.author.id}`}
-          className="ml-auto text-sm text-muted-foreground hover:text-primary transition-colors"
-        >
-          View Profile
-        </Link>
-      </div> */}
     </article>
   )
 }

@@ -133,24 +133,12 @@ export default function SettingsPage() {
                   Joined {formatDate(currentUser.joinDate)}
                 </p>
               </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-border/50">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{formatNumber(currentUser.followers)}</p>
-                  <p className="text-xs text-muted-foreground">Followers</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-foreground">{formatNumber(currentUser.following)}</p>
-                  <p className="text-xs text-muted-foreground">Following</p>
-                </div>
-              </div>
             </div>
 
             {/* Engagement Stats */}
             <div className="glass rounded-xl p-6">
               <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-primary" />
+                <FileText className="w-5 h-5 text-primary" />
                 Your Stats
               </h3>
               <div className="space-y-4">
@@ -160,29 +148,6 @@ export default function SettingsPage() {
                     Total Posts
                   </span>
                   <span className="font-semibold text-foreground">{currentUser.totalPosts}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Heart className="w-4 h-4" />
-                    Likes Received
-                  </span>
-                  <span className="font-semibold text-foreground">{formatNumber(currentUser.totalLikes)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Eye className="w-4 h-4" />
-                    Total Views
-                  </span>
-                  <span className="font-semibold text-foreground">{formatNumber(currentUser.totalViews)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    Engagement Rate
-                  </span>
-                  <span className="font-semibold text-accent">
-                    {((currentUser.totalLikes / currentUser.totalViews) * 100).toFixed(1)}%
-                  </span>
                 </div>
               </div>
             </div>

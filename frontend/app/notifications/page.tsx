@@ -6,7 +6,6 @@ import {
   Bell, 
   Heart, 
   MessageCircle, 
-  UserPlus, 
   AtSign,
   ArrowLeft,
   Check,
@@ -24,7 +23,7 @@ import { User } from '@/lib/schemas'
 
 interface Notification {
   id: string
-  type: 'like' | 'comment' | 'follow' | 'mention'
+  type: 'like' | 'comment' | 'mention'
   user: typeof mockUsers[0]
   content: string
   postTitle?: string
@@ -52,14 +51,6 @@ const mockNotifications: Notification[] = [
     postTitle: 'Why TypeScript Changed My Life as a Developer',
     postId: '2',
     createdAt: '2024-12-15T09:15:00Z',
-    isRead: false,
-  },
-  {
-    id: '3',
-    type: 'follow',
-    user: mockUsers[2],
-    content: 'started following you',
-    createdAt: '2024-12-14T18:45:00Z',
     isRead: false,
   },
   {
@@ -125,8 +116,6 @@ export default function NotificationsPage() {
         return <Heart className="w-4 h-4 text-destructive" />
       case 'comment':
         return <MessageCircle className="w-4 h-4 text-accent" />
-      case 'follow':
-        return <UserPlus className="w-4 h-4 text-success" />
       case 'mention':
         return <AtSign className="w-4 h-4 text-primary" />
     }

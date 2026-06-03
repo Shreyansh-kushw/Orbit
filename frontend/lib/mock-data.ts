@@ -7,12 +7,7 @@ export interface User {
   avatar: string
   bio: string
   joinDate: string
-  followers: number
-  following: number
   totalPosts: number
-  totalLikes: number
-  totalViews: number
-  isFollowing?: boolean
 }
 
 export interface Post {
@@ -48,11 +43,7 @@ export const mockUsers: User[] = [
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=cosmic',
     bio: 'Exploring the digital cosmos one post at a time. Tech enthusiast and philosophy lover.',
     joinDate: '2024-01-15',
-    followers: 12400,
-    following: 892,
     totalPosts: 234,
-    totalLikes: 45600,
-    totalViews: 890000,
   },
   {
     id: '2',
@@ -61,11 +52,7 @@ export const mockUsers: User[] = [
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=nebula',
     bio: 'Full-stack developer building the future. Open source contributor.',
     joinDate: '2024-02-20',
-    followers: 8900,
-    following: 456,
     totalPosts: 156,
-    totalLikes: 32100,
-    totalViews: 567000,
   },
   {
     id: '3',
@@ -74,11 +61,7 @@ export const mockUsers: User[] = [
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=stardust',
     bio: 'Words are my universe. Science fiction author and dreamer.',
     joinDate: '2024-03-10',
-    followers: 23500,
-    following: 1200,
     totalPosts: 89,
-    totalLikes: 78900,
-    totalViews: 1200000,
   },
   {
     id: '4',
@@ -87,11 +70,7 @@ export const mockUsers: User[] = [
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=quantum',
     bio: 'Physics PhD student. Making complex ideas simple.',
     joinDate: '2024-01-05',
-    followers: 15600,
-    following: 345,
     totalPosts: 312,
-    totalLikes: 56700,
-    totalViews: 980000,
   },
   {
     id: '5',
@@ -100,11 +79,7 @@ export const mockUsers: User[] = [
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=void',
     bio: 'Cryptocurrency analyst and blockchain enthusiast.',
     joinDate: '2024-04-01',
-    followers: 6700,
-    following: 234,
     totalPosts: 67,
-    totalLikes: 12300,
-    totalViews: 234000,
   },
 ]
 
@@ -278,9 +253,5 @@ export const currentUser: User = {
   avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=orbituser',
   bio: 'Just joined ORBIT! Excited to explore and connect with the community.',
   joinDate: '2024-12-01',
-  followers: 156,
-  following: 89,
   totalPosts: 12,
-  totalLikes: 234,
-  totalViews: 4500,
 }
