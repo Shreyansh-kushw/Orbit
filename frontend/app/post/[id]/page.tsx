@@ -114,7 +114,7 @@ export default function PostPage() {
               {/* Author Card */}
               <div className="flex items-start justify-between mb-6 pb-6 border-b border-border/50">
                 <div className="flex items-center gap-4">
-                  <Link href={`/profile/${post.author.username}`}>
+                  <Link href={`/profile/${post.author.id}`}>
                     <Avatar className="w-14 h-14 ring-2 ring-primary/30">
                       <AvatarImage src={post.author.avatar} alt={post.author.displayName} />
                       <AvatarFallback>{post.author.displayName[0]}</AvatarFallback>
@@ -122,7 +122,7 @@ export default function PostPage() {
                   </Link>
                   <div>
                     <Link
-                      href={`/profile/${post.author.username}`}
+                      href={`/profile/${post.author.id}`}
                       className="font-semibold text-lg text-foreground hover:text-primary transition-colors"
                     >
                       {post.author.displayName}

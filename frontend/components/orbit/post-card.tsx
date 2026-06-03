@@ -78,7 +78,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <Link href={`/profile/${post.author.username}`}>
+          <Link href={`/profile/${post.author.id}`}>
             <Avatar className="w-12 h-12 ring-2 ring-transparent group-hover:ring-primary/30 transition-all">
               <AvatarImage src="/placeholder-user.jpg" alt={post.author.displayName} />
               <AvatarFallback>{post.author.displayName[0]}</AvatarFallback>
@@ -86,7 +86,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
           </Link>
           <div>
             <Link
-              href={`/profile/${post.author.username}`}
+              href={`/profile/${post.author.id}`}
               className="font-medium text-foreground hover:text-primary transition-colors"
             >
               {post.author.displayName}
@@ -180,7 +180,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
           <span>{formatNumber(post.comments)} comments</span>
         </Link>
         <Link
-          href={`/profile/${post.author.username}`}
+          href={`/profile/${post.author.id}`}
           className="ml-auto text-sm text-muted-foreground hover:text-primary transition-colors"
         >
           View Profile

@@ -235,7 +235,7 @@ export default function NotificationsPage() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <Link href={`/profile/${notification.user.username}`}>
+                      <Link href={`/profile/${notification.user.id}`}>
                         <Avatar className="w-6 h-6">
                           <AvatarImage src={notification.user.avatar} alt={notification.user.displayName} />
                           <AvatarFallback>{notification.user.displayName[0]}</AvatarFallback>
@@ -243,7 +243,7 @@ export default function NotificationsPage() {
                       </Link>
                       <p className="text-sm">
                         <Link 
-                          href={`/profile/${notification.user.username}`}
+                          href={`/profile/${notification.user.id}`}
                           className="font-semibold text-foreground hover:text-primary transition-colors"
                         >
                           {notification.user.displayName}

@@ -196,21 +196,6 @@ function AuthPageContent() {
             Connect with thinkers, creators, and innovators from around the world. Share ideas, spark discussions, and explore new perspectives.
           </p>
 
-          {/* Stats */}
-          <div className="flex gap-8 mt-12">
-            <div>
-              <p className="text-3xl font-bold text-foreground">125K+</p>
-              <p className="text-sm text-muted-foreground">Active Users</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-foreground">890K+</p>
-              <p className="text-sm text-muted-foreground">Discussions</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-accent">3.4K</p>
-              <p className="text-sm text-muted-foreground">Online Now</p>
-            </div>
-          </div>
         </div>
       </div>
 

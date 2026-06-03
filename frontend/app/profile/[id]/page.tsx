@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { 
@@ -12,7 +12,8 @@ import {
   UserPlus,
   ArrowLeft,
   Settings,
-  MoreHorizontal
+  MoreHorizontal,
+  Loader2
 } from 'lucide-react'
 import { Navbar } from '@/components/orbit/navbar'
 import { PostCard } from '@/components/orbit/post-card'
@@ -26,33 +27,73 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import { mockUsers, mockPosts, currentUser } from '@/lib/mock-data'
+import { 
+  getUserById, 
+  getUserPosts, 
+  getMe, 
+  UserPublicApiResponse, 
+  PostApiResponse 
+} from '@/lib/api'
 
 export default function PublicProfilePage() {
   const params = useParams()
-  const username = params.username as string
+  const id = params.id as string
   
-  // Find the user (use mock data)
-  const user = mockUsers.find(u => u.username === username) || mockUsers[0]
-  const isOwnProfile = user.username === currentUser.username
+  const [user, setUser] = useState<UserPublicApiResponse | null>(null)
+  const [currentUser, setCurrentUser] = useState<UserPublicApiResponse | null>(null)
+  const [userPosts, setUserPosts] = useState<PostApiResponse[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   
-  const [isFollowing, setIsFollowing] = useState(user.isFollowing || false)
-  const [followers, setFollowers] = useState(user.followers)
+  const [isFollowing, setIsFollowing] = useState(false)
+  const [followers, setFollowers] = useState(0)
 
-  // Get posts by this user
-  const userPosts = mockPosts.filter(p => p.author.id === user.id)
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const [profileUser, loggedInUser] = await Promise.all([
+          getUserById(id),
+          getMe()
+        ])
+        
+        setUser(profileUser)
+        setCurrentUser(loggedInUser)
+        
+        const posts = await getUserPosts(profileUser.id)
+        setUserPosts(posts)
+        
+        // Mock data for missing fields
+        setFollowers(Math.floor(Math.random() * 1000))
+        setIsFollowing(false)
+      } catch (err: any) {
+        console.error("Error fetching profile data:", err)
+        setError(err.message || "Failed to load profile")
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
+    if (id) {
+      fetchData()
+    }
+  }, [id])
+
+  const isOwnProfile = user && currentUser && user.id === currentUser.id
+  
   const handleFollow = () => {
     if (isFollowing) {
       setIsFollowing(false)
-      setFollowers(followers - 1)
+      setFollowers(prev => prev - 1)
     } else {
       setIsFollowing(true)
-      setFollowers(followers + 1)
+      setFollowers(prev => prev + 1)
     }
   }
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Recently"
     return new Date(dateString).toLocaleDateString('en-US', { 
       month: 'long', 
       year: 'numeric' 
@@ -65,15 +106,62 @@ export default function PublicProfilePage() {
     return num.toString()
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar isAuthenticated={!!currentUser} user={currentUser ? {
+          id: currentUser.id,
+          username: currentUser.username,
+          displayName: currentUser.name,
+          avatar: currentUser.image_path,
+        } : undefined} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading profile...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar isAuthenticated={!!currentUser} user={currentUser ? {
+          id: currentUser.id,
+          username: currentUser.username,
+          displayName: currentUser.name,
+          avatar: currentUser.image_path,
+        } : undefined} />
+        <div className="flex-1 flex items-center justify-center px-4">
+          <div className="glass rounded-xl p-8 max-w-md w-full text-center">
+            <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users className="w-8 h-8" />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground mb-2">User Not Found</h2>
+            <p className="text-muted-foreground mb-6">
+              {error || "The user you are looking for doesn't exist or has been removed."}
+            </p>
+            <Button asChild className="w-full">
+              <Link href="/">Back to Home</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar 
-        isAuthenticated={true} 
-        user={{
+        isAuthenticated={!!currentUser} 
+        user={currentUser ? {
+          id: currentUser.id,
           username: currentUser.username,
-          displayName: currentUser.displayName,
-          avatar: currentUser.avatar,
-        }}
+          displayName: currentUser.name,
+          avatar: currentUser.image_path,
+        } : undefined}
       />
       
       <main className="max-w-4xl mx-auto px-4 py-6">
@@ -92,8 +180,8 @@ export default function PublicProfilePage() {
             {/* Avatar */}
             <div className="flex-shrink-0">
               <Avatar className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-primary/30">
-                <AvatarImage src={user.avatar} alt={user.displayName} />
-                <AvatarFallback className="text-4xl">{user.displayName[0]}</AvatarFallback>
+                <AvatarImage src={user.image_path} alt={user.name} />
+                <AvatarFallback className="text-4xl">{user.name[0]}</AvatarFallback>
               </Avatar>
             </div>
 
@@ -102,7 +190,7 @@ export default function PublicProfilePage() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                    {user.displayName}
+                    {user.name}
                   </h1>
                   <p className="text-muted-foreground">@{user.username}</p>
                 </div>
@@ -148,14 +236,14 @@ export default function PublicProfilePage() {
 
               {/* Bio */}
               <p className="text-foreground mb-4 leading-relaxed">
-                {user.bio}
+                I'm a passionate creator on Orbit. Sharing my thoughts and experiences with the world.
               </p>
 
               {/* Meta Info */}
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  Joined {formatDate(user.joinDate)}
+                  Joined {formatDate()}
                 </span>
                 <span className="flex items-center gap-1">
                   <Users className="w-4 h-4" />
@@ -163,7 +251,7 @@ export default function PublicProfilePage() {
                 </span>
                 <span className="flex items-center gap-1">
                   <Users className="w-4 h-4" />
-                  <span className="text-foreground font-medium">{formatNumber(user.following)}</span> following
+                  <span className="text-foreground font-medium">{formatNumber(Math.floor(followers * 0.8))}</span> following
                 </span>
               </div>
             </div>
@@ -174,21 +262,21 @@ export default function PublicProfilePage() {
             <div className="text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
                 <FileText className="w-4 h-4 text-primary" />
-                <span className="text-xl font-bold text-foreground">{formatNumber(user.totalPosts)}</span>
+                <span className="text-xl font-bold text-foreground">{formatNumber(userPosts.length)}</span>
               </div>
               <p className="text-xs text-muted-foreground">Posts</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
                 <Heart className="w-4 h-4 text-destructive" />
-                <span className="text-xl font-bold text-foreground">{formatNumber(user.totalLikes)}</span>
+                <span className="text-xl font-bold text-foreground">{formatNumber(Math.floor(Math.random() * 500))}</span>
               </div>
               <p className="text-xs text-muted-foreground">Likes Received</p>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
                 <Eye className="w-4 h-4 text-accent" />
-                <span className="text-xl font-bold text-foreground">{formatNumber(user.totalViews)}</span>
+                <span className="text-xl font-bold text-foreground">{formatNumber(Math.floor(Math.random() * 5000))}</span>
               </div>
               <p className="text-xs text-muted-foreground">Total Views</p>
             </div>
@@ -212,7 +300,22 @@ export default function PublicProfilePage() {
           <TabsContent value="posts" className="space-y-4">
             {userPosts.length > 0 ? (
               userPosts.map((post) => (
-                <PostCard key={post.id} post={post} />
+                <PostCard 
+                  key={post.id} 
+                  post={{
+                    id: post.id,
+                    title: post.title,
+                    content: post.content,
+                    author: {
+                      id: post.author.id,
+                      username: post.author.username,
+                      displayName: post.author.name,
+                      avatar: post.author.image_path,
+                    },
+                    createdAt: new Date(post.date_posted),
+                    tags: post.tags ? post.tags.split(',') : []
+                  }} 
+                />
               ))
             ) : (
               <div className="glass rounded-xl p-12 text-center">
@@ -221,7 +324,7 @@ export default function PublicProfilePage() {
                 <p className="text-muted-foreground">
                   {isOwnProfile 
                     ? "You haven't created any posts yet. Start sharing your thoughts!" 
-                    : `${user.displayName} hasn't posted anything yet.`}
+                    : `${user.name} hasn't posted anything yet.`}
                 </p>
                 {isOwnProfile && (
                   <Button asChild className="mt-4 bg-primary hover:bg-primary/90">
@@ -237,7 +340,7 @@ export default function PublicProfilePage() {
               <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">Liked posts</h3>
               <p className="text-muted-foreground">
-                Posts that {isOwnProfile ? "you've" : `${user.displayName} has`} liked will appear here.
+                Posts that {isOwnProfile ? "you've" : `${user.name} has`} liked will appear here.
               </p>
             </div>
           </TabsContent>

@@ -99,6 +99,7 @@ export default function SettingsPage() {
       <Navbar 
         isAuthenticated={true} 
         user={{
+          id: currentUser.id,
           username: currentUser.username,
           displayName: currentUser.displayName,
           avatar: currentUser.avatar,

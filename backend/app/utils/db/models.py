@@ -6,9 +6,8 @@ from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from pathlib import Path
 
-from backend.app.utils.db import Base, APP_DIR
+from backend.app.utils.db import Base
 
 
 class User(Base):
@@ -53,7 +52,7 @@ class User(Base):
     @property
     def image_path(self) -> str:
         if self.image_file:
-            return f"{Path(APP_DIR).parent}/media/profile_pics/{self.image_file}"
+            return f"/media/profile_pics/{self.image_file}"
 
         return (
             "/placeholder-user.jpg"

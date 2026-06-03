@@ -32,6 +32,7 @@ import { logout } from '@/lib/auth'
 interface NavbarProps {
   isAuthenticated?: boolean
   user?: {
+    id: number | string
     username: string
     displayName: string
     avatar: string
@@ -45,6 +46,7 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
   const pathname = usePathname()
 
   const defaultUser = {
+    id: '1',
     username: 'orbituser',
     displayName: 'Orbit User',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=orbituser',
@@ -146,11 +148,12 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 glass">
                   <DropdownMenuItem asChild>
-                    <Link href={`/profile/${currentUser.username}`} className="flex items-center gap-2" style={{ cursor: 'pointer' }}>
+                    <Link href={`/profile/${user.id}`} className="flex items-center gap-2 cursor-pointer">
                       <User className="w-4 h-4" />
-                      <span>Profile</span>
+                      <span>My Profile</span>
                     </Link>
                   </DropdownMenuItem>
+
                   <DropdownMenuItem asChild>
                     <Link href="/settings" className="flex items-center gap-2" style={{ cursor: 'pointer' }}>
                       <Settings className="w-4 h-4" />

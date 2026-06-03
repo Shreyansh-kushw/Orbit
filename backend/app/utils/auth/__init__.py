@@ -14,7 +14,7 @@ from backend.app.utils.db import get_db
 
 password_hash = PasswordHash.recommended()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/token")
 
 
 def hash_password(password: str) -> str:
