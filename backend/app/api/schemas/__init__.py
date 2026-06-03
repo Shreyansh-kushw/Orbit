@@ -81,6 +81,7 @@ class PostResponse(PostBase):
     date_posted: datetime
     author: UserPublic
 
+
 class PaginatedResponse(BaseModel):
     """Post class for the paginated post response"""
 
@@ -92,6 +93,7 @@ class PaginatedResponse(BaseModel):
 
 
 # Token model
+
 
 class Token(BaseModel):
     """Schema class for the access jwt token"""

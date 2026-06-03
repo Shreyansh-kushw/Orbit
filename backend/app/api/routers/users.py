@@ -69,7 +69,7 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
         username=user.username,
         email=user.email.lower(),
         name=user.name.capitalize(),
-        password_hash=hash_password(user.password),  
+        password_hash=hash_password(user.password),
     )
 
     db.add(new_user)
@@ -77,13 +77,14 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
     await db.refresh(new_user)
     return new_user
 
+
 @app.post("/token", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Takes in the login credentials and returns the access token"""
-    
+
     result = await db.execute(
         select(models.User).where(
             func.lower(models.User.email) == form_data.username.lower(),
@@ -107,11 +108,13 @@ async def login_for_access_token(
     )
     return Token(access_token=access_token, token_type="bearer")
 
+
 @app.get("/me", response_model=UserPublic)
 async def get_current_user(current_user: CurrentUser):
     """Returns the current signed in user"""
-    
+
     return current_user
+
 
 @app.get("/{user_id}", response_model=UserPublic)
 async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
@@ -124,11 +127,16 @@ async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
         return user
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
+
 @app.get("/@{username}", response_model=UserPublic)
-async def get_user_by_username(username: str, db: Annotated[AsyncSession, Depends(get_db)]):
+async def get_user_by_username(
+    username: str, db: Annotated[AsyncSession, Depends(get_db)]
+):
     """Fetches the profile of a user by their username"""
 
-    result = await db.execute(select(models.User).where(models.User.username == username))
+    result = await db.execute(
+        select(models.User).where(models.User.username == username)
+    )
     user = result.scalars().first()
 
     if user:
@@ -161,7 +169,7 @@ async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_d
 async def update_user(
     user_id: int,
     user_update: UserUpdate,
-    current_user:CurrentUser,
+    current_user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     """Updates the user profile with the supplied info."""

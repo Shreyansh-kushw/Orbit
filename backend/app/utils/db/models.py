@@ -55,10 +55,7 @@ class User(Base):
         if self.image_file:
             return f"/media/profile_pics/{self.image_file}"
 
-        return (
-            "/placeholder-user.jpg"
-        )
-    
+        return "/placeholder-user.jpg"
 
 
 class Post(Base):
@@ -84,4 +81,3 @@ class Post(Base):
     tags: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     author: Mapped[User] = relationship(back_populates="posts")
-

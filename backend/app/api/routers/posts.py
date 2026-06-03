@@ -11,17 +11,23 @@ import backend.app.utils.db.models as models
 from backend.app.utils.auth import CurrentUser
 
 from backend.app.utils.db import get_db
-from backend.app.api.schemas import PostCreate, PostResponse, PostUpdate, PaginatedResponse
+from backend.app.api.schemas import (
+    PostCreate,
+    PostResponse,
+    PostUpdate,
+    PaginatedResponse,
+)
 
 
 app = APIRouter()
 
 
 @app.get("", response_model=PaginatedResponse)
-async def get_posts(db: Annotated[AsyncSession, Depends(get_db)],
-                    skip: Annotated[int, Query(ge=0)] = 0,
-                    limit: Annotated[int, Query(ge=1, le=100)] = 20,
-                    ):
+async def get_posts(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    skip: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+):
     """Returns the list of all posts."""
 
     posts_count = await db.execute(select(func.count()).select_from(models.Post))
@@ -39,11 +45,11 @@ async def get_posts(db: Annotated[AsyncSession, Depends(get_db)],
     has_more = skip + len(posts) < total
 
     return PaginatedResponse(
-        posts= [PostResponse.validate(post) for post in posts],
-        total= total,
-        skip= skip,
-        limit= limit,
-        has_more= has_more,
+        posts=[PostResponse.validate(post) for post in posts],
+        total=total,
+        skip=skip,
+        limit=limit,
+        has_more=has_more,
     )
 
 
@@ -138,7 +144,7 @@ async def delete_post(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Post not found",
         )
-    
+
     if post.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

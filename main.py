@@ -19,6 +19,7 @@ from backend.app.api.routers import users, posts
 
 from fastapi.middleware.cors import CORSMiddleware
 
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """This lifespan function responsible for creating the database tables."""
