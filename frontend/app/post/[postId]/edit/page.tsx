@@ -32,7 +32,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL
 export default function EditPostPage() {
   const router = useRouter()
   const params = useParams()
-  const postId = params.id as string
+  const postId = params.postId as string
 
   const [initialData, setInitialData] = useState<Post | null>(null)
   const [title, setTitle] = useState('')

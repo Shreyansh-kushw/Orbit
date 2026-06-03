@@ -25,7 +25,7 @@ export default function PostPage() {
 
   const params = useParams()
   const router = useRouter()
-  const postId = params.id as string
+  const postId = params.postId as string
 
   const [rawPost, setPost] = useState<PostApiResponse | null>(null)
   const [rawUser, setRawUser] = useState<any>(null)
@@ -44,8 +44,13 @@ export default function PostPage() {
 
   useEffect(() => {
     async function loadPost() {
-      const data: PostApiResponse = await getPostsByID(postId)
-      setPost(data)
+      if (!postId) return
+      try {
+        const data: PostApiResponse = await getPostsByID(postId)
+        setPost(data)
+      } catch (err) {
+        console.error("Error loading post:", err)
+      }
     }
     loadPost()
   }, [postId])
@@ -60,7 +65,13 @@ export default function PostPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  if (!rawPost) return null
+  if (!rawPost) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   const post: Post = mapPost(rawPost)
   const user: User | null = rawUser ? mapUser(rawUser) : null
@@ -70,15 +81,7 @@ export default function PostPage() {
     user.username === post.author.username
   )
 
-  console.log('[PostPage] auth debug', {
-    authLoading,
-    userUsername: user?.username,
-    postAuthorUsername: post.author.username,
-    isAuthor,
-  })
-
   const handleDelete = async (postId: string) => {
-    
     await deletePost(postId, token)
     router.push('/')
   }
@@ -114,7 +117,7 @@ export default function PostPage() {
               {/* Author Card */}
               <div className="flex items-start justify-between mb-6 pb-6 border-b border-border/50">
                 <div className="flex items-center gap-4">
-                  <Link href={`/profile/${post.author.id}`}>
+                  <Link href={`/profile/@${post.author.username}`}>
                     <Avatar className="w-14 h-14 ring-2 ring-primary/30">
                       <AvatarImage src={post.author.avatar} alt={post.author.displayName} />
                       <AvatarFallback>{post.author.displayName[0]}</AvatarFallback>
@@ -122,7 +125,7 @@ export default function PostPage() {
                   </Link>
                   <div>
                     <Link
-                      href={`/profile/${post.author.id}`}
+                      href={`/profile/@${post.author.username}`}
                       className="font-semibold text-lg text-foreground hover:text-primary transition-colors"
                     >
                       {post.author.displayName}

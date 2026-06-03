@@ -28,7 +28,7 @@ import {
 
 export default function PublicProfilePage() {
   const params = useParams()
-  const idOrUsername = params.id as string
+  const idOrUsername = params.profileId as string
   
   const [user, setUser] = useState<UserPublicApiResponse | null>(null)
   const [currentUser, setCurrentUser] = useState<UserPublicApiResponse | null>(null)
