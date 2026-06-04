@@ -35,6 +35,11 @@ class User(Base):
         unique=True,
         nullable=False,
     )
+    bio: Mapped[str] = mapped_column(
+        String(300),
+        nullable=True,
+        default="I'm a passionate member of Orbit. Sharing my thoughts and experiences with the world."
+    )
     password_hash: Mapped[str] = mapped_column(
         String(200),
         nullable=False,
