@@ -52,7 +52,7 @@ export default function SettingsPage() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   
-  const [user, setUser] = useState<(UserPublicApiResponse & { email: string, bio?: string }) | null>(null)
+  const [user, setUser] = useState<(UserPublicApiResponse & { email: string }) | null>(null)
   const [userPosts, setUserPosts] = useState<PostApiResponse[]>([])
   const [totalPosts, setTotalPosts] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
@@ -106,6 +106,7 @@ export default function SettingsPage() {
         name: profileData.name,
         username: profileData.username,
         email: profileData.email,
+        bio: profileData.bio,
       })
       setUser({ ...user, ...updated })
       toast.success("Profile updated successfully")
@@ -134,7 +135,20 @@ export default function SettingsPage() {
     setIsUploadingAvatar(true)
     try {
       const updatedUser = await uploadAvatar(user.id, file)
-      setUser({ ...user, ...updatedUser })
+
+      // Ensure image_path exists before trying to manipulate it
+      const rawPath = updatedUser.image_path || user.image_path || ''
+
+      // Add a timestamp to the image path to force browser to re-fetch the new image
+      const fullPath = rawPath.includes('?') 
+        ? `${rawPath}&t=${Date.now()}`
+        : `${rawPath}?t=${Date.now()}`
+
+      setUser({ 
+        ...user, 
+        ...updatedUser,
+        image_path: fullPath
+      })
       toast.success("Profile picture updated successfully")
     } catch (err: any) {
       console.error("Error uploading avatar:", err)
@@ -219,8 +233,8 @@ export default function SettingsPage() {
                     className="relative rounded-full cursor-pointer"
                     onClick={handleAvatarClick}
                   >
-                    <Avatar className="w-24 h-24 mx-auto ring-4 ring-primary/30 overflow-hidden">
-                      <AvatarImage src={user.image_path.startsWith('http') ? user.image_path : `${API_URL}${user.image_path}`} alt={user.name} />
+                    <Avatar key={user.image_path} className="w-24 h-24 mx-auto ring-4 ring-primary/30 overflow-hidden">
+                      <AvatarImage src={user.image_path?.startsWith('http') ? user.image_path : `${API_URL}${user.image_path || ''}`} alt={user.name} />
                       <AvatarFallback className="text-3xl">{user.name[0]}</AvatarFallback>
                     </Avatar>
                     
@@ -235,7 +249,10 @@ export default function SettingsPage() {
                 </div>
                 
                 <h2 className="text-xl font-bold text-foreground mt-4">{user.name}</h2>
-                <p className="text-muted-foreground mb-3">@{user.username}</p>
+                <p className="text-muted-foreground mb-1">@{user.username}</p>
+                <p className="text-sm text-muted-foreground mb-3 px-4 italic line-clamp-2">
+                  &quot;{user.bio}&quot;
+                </p>
                 <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
                   <Calendar className="w-4 h-4" />
                   Joined {formatDate(user.date_joined)}
@@ -356,10 +373,12 @@ export default function SettingsPage() {
                       <Textarea
                         id="bio"
                         value={profileData.bio}
-                        onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                        onChange={(e) => setProfileData({ ...profileData, bio: e.target.value.slice(0, 300) })}
+                        maxLength={300}
                         className="bg-secondary/30 border-border/50 min-h-[100px]"
                         placeholder="Tell us about yourself..."
                       />
+                      <p className="text-[10px] text-muted-foreground text-right">{profileData.bio.length}/300</p>
                     </div>
                     <Button onClick={handleSaveProfile} disabled={isSaving} className="bg-primary hover:bg-primary/90">
                       {isSaving ? (

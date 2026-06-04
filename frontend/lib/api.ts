@@ -9,6 +9,7 @@ export interface UserPublicApiResponse {
     username: string
     name: string
     email?: string
+    bio: string
     date_joined: string
     image_file: string | null
     image_path: string

@@ -129,9 +129,26 @@ export default function PublicProfilePage() {
     setIsUploadingAvatar(true)
     try {
       const updatedUser = await uploadAvatar(user.id, file)
-      setUser(updatedUser)
-      // Also update currentUser to reflect changes in Navbar etc
-      setCurrentUser(updatedUser)
+      
+      // Add a timestamp to force browser to re-fetch the new image
+      const cacheBustedPath = `${updatedUser.image_path}?v=${Date.now()}`
+      
+      const timestampedUser = {
+        ...updatedUser,
+        image_path: cacheBustedPath
+      }
+      
+      setUser(timestampedUser)
+      
+      // Also update currentUser to reflect changes in Navbar immediately
+      if (currentUser && currentUser.id === user.id) {
+        setCurrentUser({
+          ...timestampedUser,
+          avatar: cacheBustedPath,
+          displayName: timestampedUser.name
+        } as any)
+      }
+      
       toast.success("Profile picture updated successfully")
     } catch (err: any) {
       console.error("Error uploading avatar:", err)
@@ -241,9 +258,13 @@ export default function PublicProfilePage() {
                 className={`relative rounded-full ${isOwnProfile ? 'cursor-pointer' : ''}`}
                 onClick={handleAvatarClick}
               >
-                <Avatar className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-primary/30 overflow-hidden">
-                  <AvatarImage src={user.image_path.startsWith('http') ? user.image_path : `${API_URL}${user.image_path}`} alt={user.name} />
-                  <AvatarFallback className="text-4xl">{user.name[0]}</AvatarFallback>
+                {/* We use image_path as a key to force re-render the entire Avatar when it changes */}
+                <Avatar key={user.image_path} className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-primary/30 overflow-hidden">
+                  <AvatarImage 
+                    src={user.image_path?.startsWith('http') ? user.image_path : `${API_URL}${user.image_path || ''}`} 
+                    alt={user.name} 
+                  />
+                  <AvatarFallback className="text-4xl">{user.name?.[0] || 'U'}</AvatarFallback>
                 </Avatar>
                 
                 {isOwnProfile && (
@@ -269,7 +290,7 @@ export default function PublicProfilePage() {
                 </div>
 
                 {isOwnProfile && (
-                  <Button variant="outline" asChild>
+                  <Button variant="outline" asChild size="sm">
                     <Link href="/settings">
                       <Settings className="w-4 h-4 mr-2" />
                       Edit Profile
@@ -279,8 +300,8 @@ export default function PublicProfilePage() {
               </div>
 
               {/* Bio */}
-              <p className="text-foreground mb-4 leading-relaxed">
-                I'm a passionate creator on Orbit. Sharing my thoughts and experiences with the world.
+              <p className="text-foreground mb-4 leading-relaxed max-w-2xl">
+                {user.bio}
               </p>
 
               {/* Meta Info */}

@@ -273,7 +273,7 @@ async def update_user(
     await db.refresh(user)
     return user
 
-@app.post("/{user_id}/avatar")
+@app.post("/{user_id}/avatar", response_model=UserPrivate)
 async def upload_avatar(
     user_id: int,
     current_user: CurrentUser,
