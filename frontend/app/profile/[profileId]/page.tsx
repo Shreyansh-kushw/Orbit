@@ -220,7 +220,7 @@ export default function PublicProfilePage() {
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  Joined {formatDate()}
+                  Joined {formatDate(user.date_joined)}
                 </span>
               </div>
             </div>

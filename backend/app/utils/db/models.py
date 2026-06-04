@@ -39,6 +39,10 @@ class User(Base):
         String(200),
         nullable=False,
     )
+    date_joined: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+    )
     image_file: Mapped[str | None] = mapped_column(
         String(200),
         default=None,

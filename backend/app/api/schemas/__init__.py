@@ -36,6 +36,7 @@ class UserPublic(BaseModel):
     id: int
     username: str
     name: str
+    date_joined: datetime
     image_file: str | None
     image_path: str
 

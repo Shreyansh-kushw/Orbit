@@ -8,6 +8,7 @@ export interface UserPublicApiResponse {
     id: number
     username: string
     name: string
+    date_joined: string
     image_file: string | null
     image_path: string
 }
