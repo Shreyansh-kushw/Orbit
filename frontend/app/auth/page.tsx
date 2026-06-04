@@ -374,18 +374,7 @@ function AuthPageContent() {
                 </div>
               )}
 
-              {/* Forgot Password (Login only) */}
-              {mode === 'login' && (
-                <div className="flex justify-end">
-                  <Link
-                    href="/auth/forgot-password"
-                    className="text-sm text-primary hover:underline"
-                    style={{ cursor: 'pointer' }}
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-              )}
+
               {/* Error label */}
               {exception && (
                 <p className="text-red-500 text-sm">

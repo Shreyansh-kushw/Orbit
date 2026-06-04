@@ -177,12 +177,7 @@ export default function PublicProfilePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <Navbar isAuthenticated={!!currentUser} user={currentUser ? {
-          id: currentUser.id,
-          username: currentUser.username,
-          displayName: currentUser.name,
-          avatar: currentUser.image_path,
-        } : undefined} />
+        <div className="h-16" />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto mb-4" />

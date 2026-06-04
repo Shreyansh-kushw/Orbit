@@ -4,11 +4,13 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value
   const isAuthPage = request.nextUrl.pathname.startsWith('/auth')
   const isCreatePage = request.nextUrl.pathname.startsWith('/create')
+  const isSettingsPage = request.nextUrl.pathname.startsWith('/settings')
+
   if (token && isAuthPage) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
-  if (!token && isCreatePage){
+  if (!token && (isCreatePage || isSettingsPage)){
     return NextResponse.redirect(new URL('/', request.url))
   }
 
@@ -16,5 +18,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/auth/:path*', '/create/:path*', '/create'],
+  matcher: ['/auth/:path*', '/create/:path*', '/create', '/settings/:path*', '/settings'],
 }
