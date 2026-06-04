@@ -3,9 +3,7 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, EmailStr
 
-
 # User models
-
 
 class UserBase(BaseModel):
     """Base User class for other User models to build upon"""

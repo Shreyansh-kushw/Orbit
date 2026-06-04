@@ -94,10 +94,16 @@ function AuthPageContent() {
         setIsLoading(false)
         if (!response.ok) {
           const errorResponse = await response.json()
-          throw new Error(`Error: ${JSON.stringify(errorResponse.detail).replaceAll(`"`, ``)}`)
+          const detail = errorResponse.detail
+          const cleanError = typeof detail === 'string' 
+            ? detail 
+            : Array.isArray(detail) 
+              ? detail[0]?.msg || "Validation error"
+              : "An error occurred during signup"
+          throw new Error(cleanError)
         }
         else {
-          const msg = `Sign up successfull, kindly login.`
+          const msg = `Sign up successful, kindly login.`
           window.location.href = `/auth?mode=login&message=${encodeURIComponent(msg)}`
         }
       }
@@ -106,7 +112,7 @@ function AuthPageContent() {
           setError(error.message)
         }
         else {
-          setError(`An unexpected error occured: ${error}`)
+          setError(`An unexpected error occurred`)
         }
         return
       }
@@ -142,7 +148,11 @@ function AuthPageContent() {
         else {
           setIsLoading(false)
           const errorResponse = await response.json()
-          throw new Error(`Error: ${JSON.stringify(errorResponse.detail).replaceAll(`"`, ``)}`)
+          const detail = errorResponse.detail
+          const cleanError = typeof detail === 'string' 
+            ? detail 
+            : "Incorrect email or password"
+          throw new Error(cleanError)
         }
 
 
@@ -152,7 +162,7 @@ function AuthPageContent() {
           setError(error.message)
         }
         else {
-          setError(`An unexpected error occured: ${error}`)
+          setError(`An unexpected error occurred`)
         }
         return
       }
@@ -301,12 +311,14 @@ function AuthPageContent() {
                       value={formData.username}
                       onChange={(e) => setFormData({
                         ...formData,
-                        username: e.target.value.replace(/[^a-zA-Z0-9_]/g, '')
+                        username: e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 30)
                       })}
+                      maxLength={30}
                       className="pl-10 bg-secondary/30 border-border/50 focus:border-primary/50"
                       required
                     />
                   </div>
+                  <p className="text-[10px] text-muted-foreground text-right">{formData.username.length}/30</p>
                 </div>
               )}
 

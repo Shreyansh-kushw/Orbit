@@ -235,8 +235,7 @@ export default function SettingsPage() {
                 </div>
                 
                 <h2 className="text-xl font-bold text-foreground mt-4">{user.name}</h2>
-                <p className="text-muted-foreground mb-1">@{user.username}</p>
-                <p className="text-sm text-primary font-medium mb-3">{user.email}</p>
+                <p className="text-muted-foreground mb-3">@{user.username}</p>
                 <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
                   <Calendar className="w-4 h-4" />
                   Joined {formatDate(user.date_joined)}
@@ -329,9 +328,14 @@ export default function SettingsPage() {
                         <Input
                           id="username"
                           value={profileData.username}
-                          onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
+                          onChange={(e) => setProfileData({ 
+                            ...profileData, 
+                            username: e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 30) 
+                          })}
+                          maxLength={30}
                           className="bg-secondary/30 border-border/50"
                         />
+                        <p className="text-[10px] text-muted-foreground text-right">{profileData.username.length}/30</p>
                       </div>
                     </div>
                     <div className="space-y-2">
