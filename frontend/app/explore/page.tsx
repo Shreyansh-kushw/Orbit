@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Suspense, useMemo } from 'react'
+import { useEffect, useState, Suspense, useMemo, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, TrendingUp, Hash, Loader2 } from 'lucide-react'
 import { Navbar } from '@/components/orbit/navbar'
@@ -86,14 +86,30 @@ function ExplorePageContent() {
 
   const user: User | null = rawUser ? mapUser(rawUser) : null
 
+  // Accumulate tags stably and avoid case-sensitive duplicates
+  const accumulatedTagsRef = useRef(new Map<string, string>([
+    ['ai', 'AI'],
+    ['technology', 'Technology'],
+    ['programming', 'Programming'],
+    ['science', 'Science'],
+    ['philosophy', 'Philosophy'],
+    ['web3', 'Web3'],
+    ['space', 'Space'],
+    ['future', 'Future']
+  ]))
+
   // Extract all unique tags from real post data
   const allAvailableTags = useMemo(() => {
-    const defaults = ['AI', 'Technology', 'Programming', 'Science', 'Philosophy', 'Web3', 'Space', 'Future']
-    const tagsSet = new Set<string>(defaults)
     posts.forEach(post => {
-      post.tags?.forEach(tag => tagsSet.add(tag))
+      post.tags?.forEach(tag => {
+        if (!tag) return
+        const lower = tag.toLowerCase()
+        if (!accumulatedTagsRef.current.has(lower)) {
+          accumulatedTagsRef.current.set(lower, tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase())
+        }
+      })
     })
-    return Array.from(tagsSet).sort()
+    return Array.from(accumulatedTagsRef.current.values()).sort()
   }, [posts])
 
   // Filter posts based on search and tag
@@ -160,7 +176,7 @@ function ExplorePageContent() {
                 >
                   All Topics
                 </Button>
-                {allAvailableTags.map(tag => (
+                {allAvailableTags.map((tag: string) => (
                   <Button
                     key={tag}
                     variant="outline"
@@ -168,7 +184,7 @@ function ExplorePageContent() {
                     onClick={() => handleTagSelect(tag)}
                     className={cn(
                       "rounded-full transition-all capitalize",
-                      selectedTag === tag 
+                      selectedTag.toLowerCase() === tag.toLowerCase() 
                         ? "bg-primary text-primary-foreground border-primary glow-primary" 
                         : "hover:bg-primary/10 hover:text-primary hover:border-primary/50"
                     )}
