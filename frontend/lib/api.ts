@@ -126,6 +126,29 @@ export async function getUserPosts(userId: number, skip = 0, limit = 20): Promis
     return response.json()
 }
 
+export async function uploadAvatar(userId: number, file: File): Promise<UserPublicApiResponse> {
+    const token = Cookies.get('access_token')
+    if (!token) throw new Error("Not authenticated")
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await fetch(`${API_URL}/api/users/${userId}/avatar`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+    })
+
+    if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || "Failed to upload avatar")
+    }
+
+    return response.json()
+}
+
 export async function deletePost(post_id: string, token: string | undefined) {
     try {
         const response = await fetch(`${API_URL}/api/posts/${post_id}`, {

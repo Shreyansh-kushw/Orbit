@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { 
@@ -9,7 +9,8 @@ import {
   ArrowLeft,
   Settings,
   Loader2,
-  User
+  User,
+  Camera
 } from 'lucide-react'
 import { Navbar } from '@/components/orbit/navbar'
 import { PostCard } from '@/components/orbit/post-card'
@@ -21,13 +22,16 @@ import {
   getUserByUsername,
   getUserPosts, 
   getMe, 
+  uploadAvatar,
   UserPublicApiResponse, 
   PostApiResponse 
 } from '@/lib/api'
+import { toast } from 'sonner'
 
 export default function PublicProfilePage() {
   const params = useParams()
   const idOrUsername = params.profileId as string
+  const fileInputRef = useRef<HTMLInputElement>(null)
   
   const [user, setUser] = useState<UserPublicApiResponse | null>(null)
   const [currentUser, setCurrentUser] = useState<UserPublicApiResponse | null>(null)
@@ -37,6 +41,7 @@ export default function PublicProfilePage() {
   const [hasMore, setHasMore] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
   const limit = 10
@@ -98,6 +103,44 @@ export default function PublicProfilePage() {
 
   const isOwnProfile = user && currentUser && user.id === currentUser.id
   
+  const handleAvatarClick = () => {
+    if (isOwnProfile && !isUploadingAvatar) {
+      fileInputRef.current?.click()
+    }
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+
+    // Basic validation
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file")
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB")
+      return
+    }
+
+    setIsUploadingAvatar(true)
+    try {
+      const updatedUser = await uploadAvatar(user.id, file)
+      setUser(updatedUser)
+      // Also update currentUser to reflect changes in Navbar etc
+      setCurrentUser(updatedUser)
+      toast.success("Profile picture updated successfully")
+    } catch (err: any) {
+      console.error("Error uploading avatar:", err)
+      toast.error(err.message || "Failed to upload avatar")
+    } finally {
+      setIsUploadingAvatar(false)
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return "Recently"
     return new Date(dateString).toLocaleDateString('en-US', { 
@@ -184,11 +227,33 @@ export default function PublicProfilePage() {
         <div className="glass rounded-xl p-6 md:p-8 mb-6">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Avatar */}
-            <div className="flex-shrink-0">
-              <Avatar className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-primary/30">
-                <AvatarImage src={user.image_path} alt={user.name} />
-                <AvatarFallback className="text-4xl">{user.name[0]}</AvatarFallback>
-              </Avatar>
+            <div className="flex-shrink-0 relative group">
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden" 
+                accept="image/*"
+              />
+              <div 
+                className={`relative rounded-full ${isOwnProfile ? 'cursor-pointer' : ''}`}
+                onClick={handleAvatarClick}
+              >
+                <Avatar className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-primary/30 overflow-hidden">
+                  <AvatarImage src={user.image_path} alt={user.name} />
+                  <AvatarFallback className="text-4xl">{user.name[0]}</AvatarFallback>
+                </Avatar>
+                
+                {isOwnProfile && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                    {isUploadingAvatar ? (
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    ) : (
+                      <Camera className="w-8 h-8 text-white" />
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Info */}

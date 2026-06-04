@@ -26,7 +26,7 @@ export default async function TermsPage() {
 
               <div className="prose prose-invert max-w-none space-y-8 text-muted-foreground">
                 <section>
-                  <p className="text-lg">
+                  <p className="text-xl">
                     By accessing or using ORBIT, you agree to be bound by these Terms of Service. 
                     Please read them carefully before using our platform.
                   </p>
@@ -38,8 +38,8 @@ export default async function TermsPage() {
                       <CheckCircle2 className="w-5 h-5 text-success" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-semibold text-foreground m-0 mb-2">User Responsibilities</h2>
-                      <p className="text-sm">
+                      <h2 className="text-2xl font-semibold text-foreground m-0 mb-2">User Responsibilities</h2>
+                      <p className="text-base">
                         You are responsible for your use of ORBIT and for any content you provide. 
                         You must comply with all applicable laws and regulations. You may not use 
                         ORBIT for any illegal or unauthorized purpose.
@@ -52,8 +52,8 @@ export default async function TermsPage() {
                       <AlertCircle className="w-5 h-5 text-warning" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-semibold text-foreground m-0 mb-2">Content Restrictions</h2>
-                      <p className="text-sm">
+                      <h2 className="text-2xl font-semibold text-foreground m-0 mb-2">Content Restrictions</h2>
+                      <p className="text-base">
                         We reserve the right to remove content that violates our community guidelines, 
                         including but not limited to: harassment, hate speech, and intellectual 
                         property infringement.
@@ -66,8 +66,8 @@ export default async function TermsPage() {
                       <Gavel className="w-5 h-5 text-accent" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-semibold text-foreground m-0 mb-2">Disclaimers</h2>
-                      <p className="text-sm">
+                      <h2 className="text-2xl font-semibold text-foreground m-0 mb-2">Disclaimers</h2>
+                      <p className="text-base">
                         ORBIT is provided &quot;as is&quot; without any warranties. We do not guarantee 
                         that the platform will always be safe, secure, or error-free.
                       </p>
@@ -77,7 +77,7 @@ export default async function TermsPage() {
 
                 <section>
                   <h2 className="text-2xl font-bold text-foreground">Termination</h2>
-                  <p>
+                  <p className="text-base">
                     We may suspend or terminate your access to ORBIT at any time, with or without 
                     cause, if we believe you have violated these terms.
                   </p>
