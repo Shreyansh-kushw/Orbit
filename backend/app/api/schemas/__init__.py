@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, EmailStr
 class UserBase(BaseModel):
     """Base User class for other User models to build upon"""
 
-    username: str = Field(min_length=1, max_length=50)
+    username: str = Field(min_length=1, max_length=30)
     name: str = Field(min_length=1, max_length=200)
     email: EmailStr = Field(max_length=120)
 

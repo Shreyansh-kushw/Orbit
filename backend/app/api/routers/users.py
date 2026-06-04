@@ -114,7 +114,7 @@ async def login_for_access_token(
     return Token(access_token=access_token, token_type="bearer")
 
 
-@app.get("/me", response_model=UserPublic)
+@app.get("/me", response_model=UserPrivate)
 async def get_current_user(current_user: CurrentUser):
     """Returns the current signed in user"""
 

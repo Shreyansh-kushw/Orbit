@@ -1,20 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { 
   Calendar, 
   FileText, 
-  Eye,
-  TrendingUp,
   ArrowLeft,
-  Lock,
-  Shield,
   Trash2,
   Save,
   AlertTriangle,
   Mail,
-  User
+  User,
+  Loader2,
+  Camera
 } from 'lucide-react'
 import { Navbar } from '@/components/orbit/navbar'
 import { PostCard } from '@/components/orbit/post-card'
@@ -24,7 +23,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Switch } from '@/components/ui/switch'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,61 +34,160 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { mockPosts, currentUser } from '@/lib/mock-data'
+import { 
+  getPrivateMe, 
+  getUserPosts, 
+  updateUser, 
+  deleteUser,
+  uploadAvatar,
+  UserPublicApiResponse,
+  PostApiResponse
+} from '@/lib/api'
+import { toast } from 'sonner'
+import { logout } from '@/lib/auth'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export default function SettingsPage() {
-  const [profileData, setProfileData] = useState({
-    displayName: currentUser.displayName,
-    username: currentUser.username,
-    email: 'orbituser@example.com',
-    bio: currentUser.bio,
-  })
-
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-  })
-
-  const [privacy, setPrivacy] = useState({
-    publicProfile: true,
-    showEmail: false,
-    showStats: true,
-  })
-
+  const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  const [user, setUser] = useState<(UserPublicApiResponse & { email: string, bio?: string }) | null>(null)
+  const [userPosts, setUserPosts] = useState<PostApiResponse[]>([])
+  const [totalPosts, setTotalPosts] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
 
-  // Get user's posts and drafts
-  const userPosts = mockPosts.filter(p => p.author.username === currentUser.username)
+  const [profileData, setProfileData] = useState({
+    name: '',
+    username: '',
+    email: '',
+    bio: '',
+  })
+
+  useEffect(() => {
+    async function fetchData() {
+      setIsLoading(true)
+      try {
+        const userData = await getPrivateMe()
+        if (!userData) {
+          router.push('/auth?mode=login')
+          return
+        }
+        
+        setUser(userData as any)
+        setProfileData({
+          name: userData.name,
+          username: userData.username,
+          email: userData.email,
+          bio: (userData as any).bio || '',
+        })
+
+        const postsResponse = await getUserPosts(userData.id, 0, 100)
+        setUserPosts(postsResponse.posts)
+        setTotalPosts(postsResponse.total)
+      } catch (err) {
+        console.error("Error fetching settings data:", err)
+        toast.error("Failed to load settings")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchData()
+  }, [router])
 
   const handleSaveProfile = async () => {
+    if (!user) return
     setIsSaving(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsSaving(false)
+    try {
+      const updated = await updateUser(user.id, {
+        name: profileData.name,
+        username: profileData.username,
+        email: profileData.email,
+      })
+      setUser({ ...user, ...updated })
+      toast.success("Profile updated successfully")
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update profile")
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
-    return num.toString()
+  const handleAvatarClick = () => {
+    if (!isUploadingAvatar) {
+      fileInputRef.current?.click()
+    }
   }
 
-  const formatDate = (dateString: string) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file")
+      return
+    }
+
+    setIsUploadingAvatar(true)
+    try {
+      const updatedUser = await uploadAvatar(user.id, file)
+      setUser({ ...user, ...updatedUser })
+      toast.success("Profile picture updated successfully")
+    } catch (err: any) {
+      console.error("Error uploading avatar:", err)
+      toast.error(err.message || "Failed to upload avatar")
+    } finally {
+      setIsUploadingAvatar(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!user) return
+    setIsDeleting(true)
+    try {
+      await deleteUser(user.id)
+      await logout()
+      toast.success("Account deleted successfully")
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete account")
+      setIsDeleting(false)
+    }
+  }
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Recently"
     return new Date(dateString).toLocaleDateString('en-US', { 
       month: 'long', 
       year: 'numeric' 
     })
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar isAuthenticated={true} />
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) return null
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar 
         isAuthenticated={true} 
         user={{
-          id: currentUser.id,
-          username: currentUser.username,
-          displayName: currentUser.displayName,
-          avatar: currentUser.avatar,
+          id: user.id,
+          username: user.username,
+          displayName: user.name,
+          avatar: user.image_path,
         }}
       />
       
@@ -110,33 +207,51 @@ export default function SettingsPage() {
             {/* Profile Card */}
             <div className="glass rounded-xl p-6">
               <div className="text-center">
-                <Avatar className="w-24 h-24 mx-auto ring-4 ring-primary/30">
-                  <AvatarImage src={currentUser.avatar} alt={currentUser.displayName} />
-                  <AvatarFallback className="text-3xl">{currentUser.displayName[0]}</AvatarFallback>
-                </Avatar>
-                <h2 className="text-xl font-bold text-foreground mt-4">{currentUser.displayName}</h2>
-                <p className="text-muted-foreground">@{currentUser.username}</p>
-                <p className="text-sm text-muted-foreground mt-2 flex items-center justify-center gap-1">
+                <div className="relative group mx-auto w-24 h-24 mb-4">
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleFileChange} 
+                    className="hidden" 
+                    accept="image/*"
+                  />
+                  <div 
+                    className="relative rounded-full cursor-pointer"
+                    onClick={handleAvatarClick}
+                  >
+                    <Avatar className="w-24 h-24 mx-auto ring-4 ring-primary/30 overflow-hidden">
+                      <AvatarImage src={user.image_path.startsWith('http') ? user.image_path : `${API_URL}${user.image_path}`} alt={user.name} />
+                      <AvatarFallback className="text-3xl">{user.name[0]}</AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+                      {isUploadingAvatar ? (
+                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                      ) : (
+                        <Camera className="w-6 h-6 text-white" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <h2 className="text-xl font-bold text-foreground mt-4">{user.name}</h2>
+                <p className="text-muted-foreground mb-1">@{user.username}</p>
+                <p className="text-sm text-primary font-medium mb-3">{user.email}</p>
+                <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  Joined {formatDate(currentUser.joinDate)}
+                  Joined {formatDate(user.date_joined)}
                 </p>
               </div>
             </div>
 
-            {/* Engagement Stats */}
+            {/* Total Posts */}
             <div className="glass rounded-xl p-6">
-              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                Your Stats
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Total Posts
-                  </span>
-                  <span className="font-semibold text-foreground">{currentUser.totalPosts}</span>
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Total Posts
+                </span>
+                <span className="font-semibold text-foreground text-lg">{totalPosts}</span>
               </div>
             </div>
           </div>
@@ -159,7 +274,22 @@ export default function SettingsPage() {
                 </div>
                 {userPosts.length > 0 ? (
                   userPosts.map((post) => (
-                    <PostCard key={post.id} post={post} />
+                    <PostCard 
+                      key={post.id} 
+                      post={{
+                        id: post.id,
+                        title: post.title,
+                        content: post.content,
+                        author: {
+                          id: post.author.id,
+                          username: post.author.username,
+                          displayName: post.author.name,
+                          avatar: post.author.image_path,
+                        },
+                        createdAt: new Date(post.date_posted),
+                        tags: post.tags ? post.tags.split(',') : []
+                      }} 
+                    />
                   ))
                 ) : (
                   <div className="glass rounded-xl p-12 text-center">
@@ -189,8 +319,8 @@ export default function SettingsPage() {
                         <Label htmlFor="displayName">Display Name</Label>
                         <Input
                           id="displayName"
-                          value={profileData.displayName}
-                          onChange={(e) => setProfileData({ ...profileData, displayName: e.target.value })}
+                          value={profileData.name}
+                          onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
                           className="bg-secondary/30 border-border/50"
                         />
                       </div>
@@ -228,74 +358,18 @@ export default function SettingsPage() {
                       />
                     </div>
                     <Button onClick={handleSaveProfile} disabled={isSaving} className="bg-primary hover:bg-primary/90">
-                      <Save className="w-4 h-4 mr-2" />
-                      {isSaving ? 'Saving...' : 'Save Changes'}
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Save Changes
+                        </>
+                      )}
                     </Button>
-                  </div>
-                </div>
-
-                {/* Change Password */}
-                <div className="glass rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <Lock className="w-5 h-5" />
-                    Change Password
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Current Password</Label>
-                      <Input
-                        id="currentPassword"
-                        type="password"
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                        className="bg-secondary/30 border-border/50"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="newPassword">New Password</Label>
-                        <Input
-                          id="newPassword"
-                          type="password"
-                          value={passwordData.newPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                          className="bg-secondary/30 border-border/50"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="confirmPassword">Confirm Password</Label>
-                        <Input
-                          id="confirmPassword"
-                          type="password"
-                          value={passwordData.confirmPassword}
-                          onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                          className="bg-secondary/30 border-border/50"
-                        />
-                      </div>
-                    </div>
-                    <Button variant="outline">Update Password</Button>
-                  </div>
-                </div>
-
-                {/* Privacy */}
-                <div className="glass rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                    <Shield className="w-5 h-5" />
-                    Privacy Settings
-                  </h3>
-                  <div className="space-y-4">
-                    {Object.entries(privacy).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between">
-                        <Label htmlFor={key} className="text-foreground cursor-pointer">
-                          {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                        </Label>
-                        <Switch
-                          id={key}
-                          checked={value}
-                          onCheckedChange={(checked) => setPrivacy({ ...privacy, [key]: checked })}
-                        />
-                      </div>
-                    ))}
                   </div>
                 </div>
 
@@ -310,9 +384,18 @@ export default function SettingsPage() {
                   </p>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="destructive">
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete Account
+                      <Button variant="destructive" disabled={isDeleting}>
+                        {isDeleting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Account
+                          </>
+                        )}
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent className="glass border-destructive/30">
@@ -325,7 +408,10 @@ export default function SettingsPage() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction className="bg-destructive hover:bg-destructive/90">
+                        <AlertDialogAction 
+                          onClick={handleDeleteAccount}
+                          className="bg-destructive hover:bg-destructive/90 text-white border-none"
+                        >
                           Delete Account
                         </AlertDialogAction>
                       </AlertDialogFooter>

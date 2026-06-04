@@ -8,6 +8,7 @@ export interface UserPublicApiResponse {
     id: number
     username: string
     name: string
+    email?: string
     date_joined: string
     image_file: string | null
     image_path: string
@@ -48,6 +49,65 @@ export async function getMe(): Promise<UserPublicApiResponse | null> {
         console.error("Error fetching current user:", error)
         return null
     }
+}
+
+export async function getPrivateMe(): Promise<UserPublicApiResponse & { email: string } | null> {
+    const token = Cookies.get('access_token')
+    if (!token) return null
+
+    try {
+        const response = await fetch(`${API_URL}/api/users/me`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+
+        if (!response.ok) return null
+        return response.json()
+    } catch (error) {
+        console.error("Error fetching private user data:", error)
+        return null
+    }
+}
+
+export async function updateUser(userId: number, data: any): Promise<UserPublicApiResponse> {
+    const token = Cookies.get('access_token')
+    if (!token) throw new Error("Not authenticated")
+
+    const response = await fetch(`${API_URL}/api/users/${userId}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || "Failed to update profile")
+    }
+
+    return response.json()
+}
+
+export async function deleteUser(userId: number): Promise<boolean> {
+    const token = Cookies.get('access_token')
+    if (!token) throw new Error("Not authenticated")
+
+    const response = await fetch(`${API_URL}/api/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    })
+
+    if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.detail || "Failed to delete account")
+    }
+
+    return true
 }
 
 export async function getPosts(skip = 0, limit = 20): Promise<PaginatedApiResponse<PostApiResponse>> {
