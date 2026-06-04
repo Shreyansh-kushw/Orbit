@@ -11,6 +11,8 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import type { Post } from '@/lib/schemas'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
 interface PostCardProps {
   post: Post
   showFullContent?: boolean
@@ -42,7 +44,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
         <div className="flex items-center gap-3">
           <Link href={`/profile/@${post.author.username}`}>
             <Avatar className="w-12 h-12 ring-2 ring-transparent group-hover:ring-primary/30 transition-all">
-              <AvatarImage src="/placeholder-user.jpg" alt={post.author.displayName} />
+              <AvatarImage src={post.author.avatar.startsWith('http') ? post.author.avatar : `${API_URL}${post.author.avatar}`} alt={post.author.displayName} />
               <AvatarFallback>{post.author.displayName[0]}</AvatarFallback>
             </Avatar>
           </Link>

@@ -59,7 +59,7 @@ class User(Base):
         if self.image_file:
             return f"/media/profile_pics/{self.image_file}"
 
-        return "/placeholder-user.jpg"
+        return "/static/placeholder-user.jpg"
 
 
 class Post(Base):

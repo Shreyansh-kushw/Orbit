@@ -133,7 +133,8 @@ export async function uploadAvatar(userId: number, file: File): Promise<UserPubl
     const formData = new FormData()
     formData.append('file', file)
 
-    const response = await fetch(`${API_URL}/api/users/${userId}/avatar`, {
+    const url = `${API_URL}/api/users/${userId}/avatar`
+    const response = await fetch(url, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -143,7 +144,7 @@ export async function uploadAvatar(userId: number, file: File): Promise<UserPubl
 
     if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.detail || "Failed to upload avatar")
+        throw new Error(`${errorData.detail || "Failed to upload avatar"} (URL: ${url})`)
     }
 
     return response.json()

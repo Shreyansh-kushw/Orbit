@@ -28,6 +28,8 @@ import {
 } from '@/lib/api'
 import { toast } from 'sonner'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
 export default function PublicProfilePage() {
   const params = useParams()
   const idOrUsername = params.profileId as string
@@ -240,7 +242,7 @@ export default function PublicProfilePage() {
                 onClick={handleAvatarClick}
               >
                 <Avatar className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-primary/30 overflow-hidden">
-                  <AvatarImage src={user.image_path} alt={user.name} />
+                  <AvatarImage src={user.image_path.startsWith('http') ? user.image_path : `${API_URL}${user.image_path}`} alt={user.name} />
                   <AvatarFallback className="text-4xl">{user.name[0]}</AvatarFallback>
                 </Avatar>
                 

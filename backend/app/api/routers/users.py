@@ -2,11 +2,15 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, File, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from datetime import timedelta
+
+import os
+import uuid
+from pathlib import Path
 
 from backend.app.utils.auth.config import settings
 
@@ -267,6 +271,45 @@ async def update_user(
 
     await db.commit()
     await db.refresh(user)
+    return user
+
+@app.post("/{user_id}/avatar")
+async def upload_avatar(
+    user_id: int,
+    current_user: CurrentUser,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    file: UploadFile =  File(...),
+):
+    """Responsible for uploading the user's avatar"""
+
+    if user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorised to perform this action.")
+
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Unsupported file type.")
+
+    uploads_dir = "backend/media/profile_pics"
+    file_extension = Path(file.filename).suffix
+
+    filename = str(uuid.uuid4().hex)
+    with open(Path(uploads_dir)/f"{filename}{file_extension}", "wb") as f:
+        
+        content = await file.read()
+        f.write(content)
+
+    result = await db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+
+    if user.image_file:
+        old_file = Path(uploads_dir)/user.image_file
+        if old_file.exists():
+            os.remove(old_file)
+
+    user.image_file = f"{filename}{file_extension}"
+    print(user.image_path)
+    await db.commit()
+    await db.refresh(user)
+
     return user
 
 
