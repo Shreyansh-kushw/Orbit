@@ -43,15 +43,10 @@ function ExplorePageContent() {
     router.push(`/explore?${params.toString()}`)
   }
 
-  // Sync selectedTag with URL query parameter
-  useEffect(() => {
-    setSelectedTag(initialTag)
-  }, [initialTag])
-
-  const fetchPosts = async (currentSkip: number, reset = false) => {
+  const fetchPosts = async (currentSkip: number, reset = false, tagToFetch = '') => {
     setIsLoadingPosts(true)
     try {
-      const response = await getPosts(currentSkip, limit)
+      const response = await getPosts(currentSkip, limit, tagToFetch)
       const newPosts = response.posts.map(mapPost)
       
       if (reset) {
@@ -70,13 +65,15 @@ function ExplorePageContent() {
     }
   }
 
+  // Sync selectedTag with URL query parameter and fetch
   useEffect(() => {
-    fetchPosts(0, true)
-  }, [])
+    setSelectedTag(initialTag)
+    fetchPosts(0, true, initialTag)
+  }, [initialTag])
 
   const handleLoadMore = () => {
     if (hasMore && !isLoadingPosts) {
-      fetchPosts(skip + limit)
+      fetchPosts(skip + limit, false, selectedTag)
     }
   }
 
@@ -91,13 +88,12 @@ function ExplorePageContent() {
 
   // Extract all unique tags from real post data
   const allAvailableTags = useMemo(() => {
-    const tagsSet = new Set<string>()
+    const defaults = ['AI', 'Technology', 'Programming', 'Science', 'Philosophy', 'Web3', 'Space', 'Future']
+    const tagsSet = new Set<string>(defaults)
     posts.forEach(post => {
       post.tags?.forEach(tag => tagsSet.add(tag))
     })
-    const defaults = ['AI', 'Technology', 'Programming', 'Science', 'Philosophy', 'Web3', 'Space', 'Future']
-    const combined = Array.from(tagsSet)
-    return combined.length > 0 ? combined.sort() : defaults
+    return Array.from(tagsSet).sort()
   }, [posts])
 
   // Filter posts based on search and tag

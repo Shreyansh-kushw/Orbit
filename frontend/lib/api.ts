@@ -111,8 +111,12 @@ export async function deleteUser(userId: number): Promise<boolean> {
     return true
 }
 
-export async function getPosts(skip = 0, limit = 20): Promise<PaginatedApiResponse<PostApiResponse>> {
-    const response = await fetch(`${API_URL}/api/posts?skip=${skip}&limit=${limit}`)
+export async function getPosts(skip = 0, limit = 20, tag = ''): Promise<PaginatedApiResponse<PostApiResponse>> {
+    let url = `${API_URL}/api/posts?skip=${skip}&limit=${limit}`
+    if (tag) {
+        url += `&tag=${encodeURIComponent(tag)}`
+    }
+    const response = await fetch(url)
 
     if (!response.ok) {
         throw new Error("Failed to fetch posts")
