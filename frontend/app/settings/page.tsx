@@ -59,6 +59,7 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const [profileData, setProfileData] = useState({
     name: '',
@@ -101,6 +102,7 @@ export default function SettingsPage() {
   const handleSaveProfile = async () => {
     if (!user) return
     setIsSaving(true)
+    setError(null)
     try {
       const updated = await updateUser(user.id, {
         name: profileData.name,
@@ -111,6 +113,7 @@ export default function SettingsPage() {
       setUser({ ...user, ...updated })
       toast.success("Profile updated successfully")
     } catch (err: any) {
+      setError(err.message || "Failed to update profile")
       toast.error(err.message || "Failed to update profile")
     } finally {
       setIsSaving(false)
@@ -329,6 +332,14 @@ export default function SettingsPage() {
                     <User className="w-5 h-5" />
                     Profile Settings
                   </h3>
+                  
+                  {error && (
+                    <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-3 text-destructive">
+                      <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+                      <p className="text-sm font-medium">{error}</p>
+                    </div>
+                  )}
+
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">

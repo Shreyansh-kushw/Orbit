@@ -266,6 +266,8 @@ async def update_user(
         user.email = user_update.email.lower()
     if user_update.name is not None:
         user.name = user_update.name.capitalize()
+    if user_update.bio is not None:
+        user.bio = user_update.bio
     if user_update.image_file is not None:
         user.image_file = user_update.image_file
 
