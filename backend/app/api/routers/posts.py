@@ -17,7 +17,7 @@ from backend.app.api.schemas import (
     PostUpdate,
     PaginatedResponse,
 )
-from backend.embedding import model 
+from backend.embedding import model
 
 app = APIRouter()
 
@@ -90,7 +90,7 @@ async def create_post(
         content=post.content,
         user_id=current_user.id,
         tags=post.tags,
-        embedding = await model.aembed_query(post.content)
+        embedding=await model.aembed_query(post.content),
     )
 
     db.add(new_post)
