@@ -10,4 +10,5 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     database_url: str
 
+
 settings = Settings()

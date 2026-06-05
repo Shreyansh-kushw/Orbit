@@ -30,102 +30,39 @@ async def get_posts(
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
-    """Returns the list of all posts."""
+    """Returns the list of all posts fitting the search criteria."""
+
+    # Base queries
+    query = select(models.Post)
+    count_query = select(func.count()).select_from(models.Post)
 
     if tag:
-        if keyword:
-            posts_count = await db.execute(
-                select(func.count())
-                .where((literal(",") + models.Post.tags + literal(",")).contains(f",{tag},"))
-                .where(
-                    or_(
-                        models.Post.title.contains(keyword),
-                        models.Post.content.contains(keyword)
-                    )
-                )
-                .select_from(models.Post)
-                )
-            total = posts_count.scalar() or 0
+        tag_filter = (literal(",") + models.Post.tags + literal(",")).contains(
+            f",{tag},"
+        )
+        query = query.where(tag_filter)
+        count_query = count_query.where(tag_filter)
 
-            result = await db.execute(
-                select(models.Post)
-                .where((literal(",") + models.Post.tags + literal(",")).contains(f",{tag},"))
-                .where(
-                    or_(
-                        models.Post.title.contains(keyword),
-                        models.Post.content.contains(keyword)
-                    )
-                )
-                .options(selectinload(models.Post.author))
-                .order_by(models.Post.date_posted.desc())
-                .offset(skip)
-                .limit(limit),
-            )
-            posts = result.scalars().all()
+    if keyword:
+        keyword_filter = or_(
+            models.Post.title.ilike(f"%{keyword}%"),
+            models.Post.content.ilike(f"%{keyword}%"),
+        )
+        query = query.where(keyword_filter)
+        count_query = count_query.where(keyword_filter)
 
-            has_more = skip + len(posts) < total
-        
-        else:
-            posts_count = await db.execute(select(func.count()).where((literal(",") + models.Post.tags + literal(",")).contains(f",{tag},")).select_from(models.Post))
-            total = posts_count.scalar() or 0
+    count = await db.execute(count_query)
+    total = count.scalar() or 0
 
-            result = await db.execute(
-                select(models.Post)
-                .where((literal(",") + models.Post.tags + literal(",")).contains(f",{tag},"))
-                .options(selectinload(models.Post.author))
-                .order_by(models.Post.date_posted.desc())
-                .offset(skip)
-                .limit(limit),
-            )
-            posts = result.scalars().all()
+    result = await db.execute(
+        query.options(selectinload(models.Post.author))
+        .order_by(models.Post.date_posted.desc())
+        .offset(skip)
+        .limit(limit),
+    )
+    posts = result.scalars().all()
 
-            has_more = skip + len(posts) < total
-    
-    else:
-        if keyword:
-            posts_count = await db.execute(
-                select(func.count())
-                .where(
-                    or_(
-                        models.Post.title.contains(keyword),
-                        models.Post.content.contains(keyword)
-                    )
-                )
-                .select_from(models.Post)
-                )
-            total = posts_count.scalar() or 0
-
-            result = await db.execute(
-                select(models.Post)
-                .where(
-                    or_(
-                        models.Post.title.contains(keyword),
-                        models.Post.content.contains(keyword)
-                    )
-                )
-                .options(selectinload(models.Post.author))
-                .order_by(models.Post.date_posted.desc())
-                .offset(skip)
-                .limit(limit),
-            )
-            posts = result.scalars().all()
-
-            has_more = skip + len(posts) < total
-
-        else:
-            posts_count = await db.execute(select(func.count()).select_from(models.Post))
-            total = posts_count.scalar() or 0
-
-            result = await db.execute(
-                select(models.Post)
-                .options(selectinload(models.Post.author))
-                .order_by(models.Post.date_posted.desc())
-                .offset(skip)
-                .limit(limit),
-            )
-            posts = result.scalars().all()
-
-            has_more = skip + len(posts) < total
+    has_more = skip + len(posts) < total
 
     return PaginatedResponse(
         posts=[PostResponse.model_validate(post) for post in posts],
@@ -163,13 +100,12 @@ async def create_post(
 
 
 @app.get("/total")
-async def get_total_posts(db: Annotated[AsyncSession, Depends(get_db)],):
+async def get_total_posts(
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
     """Returns the total number of posts on the site."""
 
-    posts_count = await db.execute(
-        select(func.count())
-        .select_from(models.Post)
-    )
+    posts_count = await db.execute(select(func.count()).select_from(models.Post))
 
     total = posts_count.scalar() or 0
 

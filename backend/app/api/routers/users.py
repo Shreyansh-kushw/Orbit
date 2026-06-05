@@ -120,18 +120,19 @@ async def get_current_user(current_user: CurrentUser):
 
     return current_user
 
+
 @app.get("/total")
-async def get_total_users(db: Annotated[AsyncSession, Depends(get_db)],):
+async def get_total_users(
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
     """Returns the total number of registered users on the site."""
 
-    user_count = await db.execute(
-        select(func.count())
-        .select_from(models.User)
-    )
+    user_count = await db.execute(select(func.count()).select_from(models.User))
 
     total = user_count.scalar() or 0
 
     return total
+
 
 @app.get("/{user_id}", response_model=UserPublic)
 async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
@@ -275,27 +276,33 @@ async def update_user(
     await db.refresh(user)
     return user
 
+
 @app.post("/{user_id}/avatar", response_model=UserPrivate)
 async def upload_avatar(
     user_id: int,
     current_user: CurrentUser,
     db: Annotated[AsyncSession, Depends(get_db)],
-    file: UploadFile =  File(...),
+    file: UploadFile = File(...),
 ):
     """Responsible for uploading the user's avatar"""
 
     if user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorised to perform this action.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not authorised to perform this action.",
+        )
 
     if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Unsupported file type.")
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Unsupported file type.",
+        )
 
     uploads_dir = "backend/media/profile_pics"
     file_extension = Path(file.filename).suffix
 
     filename = str(uuid.uuid4().hex)
-    with open(Path(uploads_dir)/f"{filename}{file_extension}", "wb") as f:
-        
+    with open(Path(uploads_dir) / f"{filename}{file_extension}", "wb") as f:
         content = await file.read()
         f.write(content)
 
@@ -303,7 +310,7 @@ async def upload_avatar(
     user = result.scalars().first()
 
     if user.image_file:
-        old_file = Path(uploads_dir)/user.image_file
+        old_file = Path(uploads_dir) / user.image_file
         if old_file.exists():
             os.remove(old_file)
 
