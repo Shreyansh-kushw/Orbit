@@ -47,7 +47,16 @@ async def get_posts(
     if keyword:
         keyword_embedding = await model.aembed_query(keyword)
         keyword_filter = models.Post.embedding.cosine_distance(keyword_embedding)
-        query = query.where(keyword_filter<0.7).order_by(keyword_filter)
+        
+        # Hybrid Filter: Semantic match OR literal keyword match
+        hybrid_condition = or_(
+            keyword_filter < 0.8,
+            models.Post.title.icontains(keyword),
+            models.Post.content.icontains(keyword)
+        )
+        
+        query = query.where(hybrid_condition).order_by(keyword_filter)
+        count_query = count_query.where(hybrid_condition)
 
     if not keyword:
         query = query.order_by(models.Post.date_posted.desc())
@@ -91,7 +100,7 @@ async def create_post(
         content=post.content,
         user_id=current_user.id,
         tags=post.tags,
-        embedding=await model.aembed_query(post.content),
+        embedding=await model.aembed_query(f"{post.title} {post.content}"),
     )
 
     db.add(new_post)
@@ -159,7 +168,11 @@ async def update_post(
         post.title = post_data.title
     if post_data.content:
         post.content = post_data.content
-        post.embedding = await model.aembed_query(post_data.content)
+    
+    # Update embedding if title or content changed
+    if post_data.title or post_data.content:
+        post.embedding = await model.aembed_query(f"{post.title} {post.content}")
+    
     if post_data.tags:
         post.tags = post_data.tags
 
