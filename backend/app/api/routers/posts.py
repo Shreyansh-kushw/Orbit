@@ -154,9 +154,13 @@ async def update_post(
             detail="Not authorized to perform this action",
         )
 
-    update_data = post_data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(post, field, value)
+    if post_data.title:
+        post.title = post_data.title
+    if post_data.content:
+        post.content = post_data.content
+        post.embedding = await model.aembed_query(post_data.content)
+    if post_data.tags:
+        post.tags = post_data.tags
 
     await db.commit()
     await db.refresh(post, attribute_names=["author"])
