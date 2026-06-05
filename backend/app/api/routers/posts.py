@@ -36,27 +36,28 @@ async def get_posts(
     query = select(models.Post)
     count_query = select(func.count()).select_from(models.Post)
 
+
     if tag:
         tag_filter = (literal(",") + models.Post.tags + literal(",")).contains(
             f",{tag},"
         )
-        query = query.where(tag_filter)
+        query = query.where(tag_filter).order_by(models.Post.date_posted.desc())
         count_query = count_query.where(tag_filter)
 
     if keyword:
-        keyword_filter = or_(
-            models.Post.title.ilike(f"%{keyword}%"),
-            models.Post.content.ilike(f"%{keyword}%"),
-        )
-        query = query.where(keyword_filter)
-        count_query = count_query.where(keyword_filter)
+        keyword_embedding = await model.aembed_query(keyword)
+        keyword_filter = models.Post.embedding.cosine_distance(keyword_embedding)
+        query = query.order_by(keyword_filter)
+    
+    if not tag and not keyword:
+        query = query.order_by(models.Post.date_posted.desc())
 
     count = await db.execute(count_query)
     total = count.scalar() or 0
 
     result = await db.execute(
         query.options(selectinload(models.Post.author))
-        .order_by(models.Post.date_posted.desc())
+        
         .offset(skip)
         .limit(limit),
     )
