@@ -11,7 +11,10 @@ export function middleware(request: NextRequest) {
   }
 
   if (!token && (isCreatePage || isSettingsPage)){
-    return NextResponse.redirect(new URL('/', request.url))
+    const loginUrl = new URL('/auth', request.url)
+    // Add the current path as a return_to parameter to improve UX
+    loginUrl.searchParams.set('callbackUrl', request.nextUrl.pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   return NextResponse.next()

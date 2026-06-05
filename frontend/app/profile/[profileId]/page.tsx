@@ -27,6 +27,7 @@ import {
   PostApiResponse 
 } from '@/lib/api'
 import { toast } from 'sonner'
+import { EmptyState } from '@/components/orbit/empty-state'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -361,20 +362,18 @@ export default function PublicProfilePage() {
                 )}
               </>
             ) : (
-              <div className="glass rounded-xl p-12 text-center">
-                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No posts yet</h3>
-                <p className="text-muted-foreground">
-                  {isOwnProfile 
-                    ? "You haven't created any posts yet. Start sharing your thoughts!" 
-                    : `${user.name} hasn't posted anything yet.`}
-                </p>
-                {isOwnProfile && (
-                  <Button asChild className="mt-4 bg-primary hover:bg-primary/90">
+              <EmptyState
+                icon={<FileText className="w-12 h-12" />}
+                title="No posts yet"
+                description={isOwnProfile 
+                  ? "You haven't created any posts yet. Start sharing your thoughts!" 
+                  : `${user.name} hasn't posted anything yet.`}
+                action={isOwnProfile && (
+                  <Button asChild className="bg-primary hover:bg-primary/90">
                     <Link href="/create">Create Your First Post</Link>
                   </Button>
                 )}
-              </div>
+              />
             )}
           </div>
         </div>

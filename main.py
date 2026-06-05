@@ -25,9 +25,7 @@ async def lifespan(_app: FastAPI):
     """This lifespan function responsible for creating the database tables."""
 
     # startup
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-        yield
+    yield
 
     # shutdown
     await engine.dispose()

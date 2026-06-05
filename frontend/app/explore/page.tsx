@@ -8,12 +8,11 @@ import { Sidebar } from '@/components/orbit/sidebar'
 import { PostCard } from '@/components/orbit/post-card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn, mapPost, mapUser } from '@/lib/utils'
 import { getPosts } from '@/lib/api'
-import { mapPost } from '@/lib/utils'
 import { Post, User } from '@/lib/schemas'
-import { mapUser } from '@/lib/utils'
 import { getCurrentUser } from '@/lib/auth'
+import { EmptyState } from '@/components/orbit/empty-state'
 
 
 function ExplorePageContent() {
@@ -239,13 +238,22 @@ function ExplorePageContent() {
                   )}
                 </>
               ) : (
-                <div className="glass rounded-xl p-12 text-center">
-                  <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">No results found</h3>
-                  <p className="text-muted-foreground">
-                    Try adjusting your search or filters to find what you&apos;re looking for.
-                  </p>
-                </div>
+                <EmptyState
+                  icon={<Search className="w-12 h-12" />}
+                  title="No results found"
+                  description="Try adjusting your search or filters to find what you're looking for."
+                  action={
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setSearchQuery('')
+                        handleTagSelect('')
+                      }}
+                    >
+                      Clear all filters
+                    </Button>
+                  }
+                />
               )}
             </div>
           </div>

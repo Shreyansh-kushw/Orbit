@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import backend.app.utils.db.models as models
-from backend.app.utils.auth.config import settings
+from backend.app.utils.config import settings
 from backend.app.utils.db import get_db
 
 password_hash = PasswordHash.recommended()
