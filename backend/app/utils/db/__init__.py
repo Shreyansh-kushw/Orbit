@@ -4,19 +4,17 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from sqlalchemy.orm import DeclarativeBase
 from pathlib import Path
 
+from backend.app.utils.auth.config import settings
+
 # getting the database directory path.
 
-CURRENT_DIR = Path(__file__).parent
-APP_DIR = Path(CURRENT_DIR).parent.parent
-DATABASE_DIR = f"{Path(APP_DIR).parent}/database"
 
 # Database Path
-SQLALCHEMY_DATABASE_URL = f"sqlite+aiosqlite:///{DATABASE_DIR}/database.db"
+SQLALCHEMY_DATABASE_URL = settings.database_url
 
 
 engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
 )
 
 AsyncSessionLocal = async_sessionmaker(
