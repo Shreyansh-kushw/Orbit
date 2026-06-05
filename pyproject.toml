@@ -16,5 +16,6 @@ dependencies = [
     "psycopg[binary]>=3.3.4",
     "pwdlib[argon2]>=0.3.0",
     "pyjwt>=2.13.0",
+    "sentence-transformers>=5.5.1",
     "sqlalchemy>=2.0.50",
 ]

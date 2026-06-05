@@ -79,7 +79,7 @@ class Post(Base):
     )
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    embeddings: Mapped[Vector] = mapped_column(Vector(1536), nullable=True)
+    embedding: Mapped[Vector] = mapped_column(Vector(1536), index=True, nullable=True)
 
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
