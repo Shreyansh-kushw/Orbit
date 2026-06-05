@@ -19,9 +19,17 @@ function ExplorePageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialTag = searchParams.get('tag') || ''
+  const initialSearch = searchParams.get('q') || ''
 
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(initialSearch)
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(initialSearch)
   const [selectedTag, setSelectedTag] = useState(initialTag)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
   const [posts, setPosts] = useState<Post[]>([])
   const [totalPosts, setTotalPosts] = useState(0)
   const [skip, setSkip] = useState(0)
@@ -42,10 +50,10 @@ function ExplorePageContent() {
     router.push(`/explore?${params.toString()}`)
   }
 
-  const fetchPosts = async (currentSkip: number, reset = false, tagToFetch = '') => {
+  const fetchPosts = async (currentSkip: number, reset = false, tagToFetch = '', keywordToFetch = '') => {
     setIsLoadingPosts(true)
     try {
-      const response = await getPosts(currentSkip, limit, tagToFetch)
+      const response = await getPosts(currentSkip, limit, tagToFetch, keywordToFetch)
       const newPosts = response.posts.map(mapPost)
       
       if (reset) {
@@ -67,12 +75,12 @@ function ExplorePageContent() {
   // Sync selectedTag with URL query parameter and fetch
   useEffect(() => {
     setSelectedTag(initialTag)
-    fetchPosts(0, true, initialTag)
-  }, [initialTag])
+    fetchPosts(0, true, initialTag, debouncedSearchQuery)
+  }, [initialTag, debouncedSearchQuery])
 
   const handleLoadMore = () => {
     if (hasMore && !isLoadingPosts) {
-      fetchPosts(skip + limit, false, selectedTag)
+      fetchPosts(skip + limit, false, selectedTag, debouncedSearchQuery)
     }
   }
 
@@ -110,19 +118,6 @@ function ExplorePageContent() {
     })
     return Array.from(accumulatedTagsRef.current.values()).sort()
   }, [posts])
-
-  // Filter posts based on search and tag
-  const filteredPosts = useMemo(() => posts.filter(post => {
-    const matchesSearch = searchQuery === '' ||
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-
-    const matchesTag = selectedTag === '' ||
-      post.tags?.some(tag => tag.toLowerCase() === selectedTag.toLowerCase())
-
-    return matchesSearch && matchesTag
-  }), [posts, searchQuery, selectedTag])
 
   return (
     <div className="min-h-screen bg-background">
@@ -210,9 +205,9 @@ function ExplorePageContent() {
                 <div className="flex justify-center py-12">
                   <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                 </div>
-              ) : filteredPosts.length > 0 ? (
+              ) : posts.length > 0 ? (
                 <>
-                  {filteredPosts.map(post => (
+                  {posts.map(post => (
                     <PostCard key={post.id} post={post} />
                   ))}
                   

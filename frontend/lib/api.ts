@@ -111,10 +111,13 @@ export async function deleteUser(userId: number): Promise<boolean> {
     return true
 }
 
-export async function getPosts(skip = 0, limit = 20, tag = ''): Promise<PaginatedApiResponse<PostApiResponse>> {
+export async function getPosts(skip = 0, limit = 20, tag = '', keyword = ''): Promise<PaginatedApiResponse<PostApiResponse>> {
     let url = `${API_URL}/api/posts?skip=${skip}&limit=${limit}`
     if (tag) {
         url += `&tag=${encodeURIComponent(tag)}`
+    }
+    if (keyword) {
+        url += `&keyword=${encodeURIComponent(keyword)}`
     }
     const response = await fetch(url)
 

@@ -111,6 +111,12 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
                     className="pr-10 bg-secondary/50 border-border/50 focus:border-primary/50"
                     autoFocus
                     onBlur={() => setIsSearchOpen(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setIsSearchOpen(false)
+                        router.push(`/explore?q=${encodeURIComponent(e.currentTarget.value)}`)
+                      }
+                    }}
                   />
                   <Button
                     variant="ghost"
