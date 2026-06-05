@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from pgvector.sqlalchemy import Vector
 
@@ -79,7 +79,10 @@ class Post(Base):
     )
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    embedding: Mapped[Vector] = mapped_column(Vector(768), index=True, nullable=True)
+    embedding: Mapped[Vector] = mapped_column(
+        Vector(768),
+        nullable=True,
+    )
 
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
@@ -93,3 +96,13 @@ class Post(Base):
     tags: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     author: Mapped[User] = relationship(back_populates="posts")
+
+    __table_args__ = (
+        Index(
+            "ix_posts_embedding",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+            postgresql_with={"m": 16, "ef_construction": 64},
+        ),
+    )

@@ -1,13 +1,22 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
 from backend.app.api.routers import users, posts
 from backend.app.utils.config import settings
+from backend.app.utils.db import engine, Base
 
 from fastapi.middleware.cors import CORSMiddleware
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Database initialization is handled by Alembic migrations
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

@@ -169,16 +169,11 @@ function ExplorePageContent() {
                 )} />
                 <Input
                   type="search"
-                  placeholder="Ask ORBIT something... (e.g. 'Future of AI' or 'Space exploration')"
+                  placeholder="Ask ORBIT something..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 bg-secondary/30 border-border/50 focus:border-primary/50 h-12 text-base"
                 />
-                {debouncedSearchQuery && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 px-2 py-1 rounded bg-primary/10 border border-primary/20">
-                    <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Semantic Mode</span>
-                  </div>
-                )}
               </div>
 
               {/* Tags */}
@@ -203,9 +198,9 @@ function ExplorePageContent() {
                     size="sm"
                     onClick={() => handleTagSelect(tag)}
                     className={cn(
-                      "rounded-full transition-all capitalize",
+                      "rounded-full transition-all capitalize border-border/50",
                       selectedTag.toLowerCase() === tag.toLowerCase() 
-                        ? "bg-primary text-primary-foreground border-primary glow-primary" 
+                        ? "bg-primary text-primary-foreground border-primary glow-primary hover:bg-primary/90 hover:text-primary-foreground" 
                         : "hover:bg-primary/10 hover:text-primary hover:border-primary/50"
                     )}
                   >

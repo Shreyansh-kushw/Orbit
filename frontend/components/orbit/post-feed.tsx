@@ -62,7 +62,7 @@ export function PostFeed({ initialPosts, initialHasMore }: PostFeedProps) {
       {posts.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}
-...
+
       {hasMore && (
         <div className="flex justify-center pt-8 pb-4">
           <Button 
