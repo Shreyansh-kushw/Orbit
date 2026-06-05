@@ -50,7 +50,7 @@ async def get_posts(
         
         # Hybrid Filter: Semantic match OR literal keyword match
         hybrid_condition = or_(
-            keyword_filter < 0.8,
+            keyword_filter < 0.7,
             models.Post.title.icontains(keyword),
             models.Post.content.icontains(keyword)
         )
