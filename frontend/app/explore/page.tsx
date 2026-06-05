@@ -59,13 +59,17 @@ function ExplorePageContent() {
   const limit = 10
 
   const handleTagSelect = (tag: string) => {
+    // If the tag is already selected, unselect it (set to '')
+    const newTag = selectedTag === tag ? '' : tag
+    
+    setSelectedTag(newTag)
     const params = new URLSearchParams(searchParams.toString())
-    if (tag) {
-      params.set('tag', tag)
+    if (newTag) {
+      params.set('tag', newTag)
     } else {
       params.delete('tag')
     }
-    router.push(`/explore?${params.toString()}`)
+    router.push(`/explore?${params.toString()}`, { scroll: false })
   }
 
   const fetchPosts = async (currentSkip: number, reset = false, tagToFetch = '', keywordToFetch = '') => {
@@ -191,11 +195,15 @@ function ExplorePageContent() {
             {/* Results */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-foreground">
+                <h2 className="text-lg font-semibold text-foreground flex items-center">
                   <span className="capitalize">{selectedTag ? `#${selectedTag}` : 'All Posts'}</span>
-                  <span className="text-muted-foreground font-normal ml-2">
-                    ({totalPosts} results)
-                  </span>
+                  {isLoadingPosts ? (
+                    <Loader2 className="w-4 h-4 ml-3 animate-spin text-muted-foreground" />
+                  ) : (
+                    <span className="text-muted-foreground font-normal ml-2 transition-opacity">
+                      ({totalPosts} results)
+                    </span>
+                  )}
                 </h2>
               </div>
 

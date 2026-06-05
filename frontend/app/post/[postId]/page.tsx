@@ -21,6 +21,8 @@ import { getCurrentUser } from '@/lib/auth'
 import { deletePost } from '@/lib/api'
 import Cookies from 'js-cookie'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
 export default function PostPage() {
 
   const params = useParams()
@@ -119,7 +121,7 @@ export default function PostPage() {
                 <div className="flex items-center gap-4">
                   <Link href={`/profile/@${post.author.username}`}>
                     <Avatar className="w-14 h-14 ring-2 ring-primary/30">
-                      <AvatarImage src={post.author.avatar} alt={post.author.displayName} />
+                      <AvatarImage src={post.author.avatar.startsWith('http') ? post.author.avatar : `${API_URL}${post.author.avatar}`} alt={post.author.displayName} />
                       <AvatarFallback>{post.author.displayName[0]}</AvatarFallback>
                     </Avatar>
                   </Link>
