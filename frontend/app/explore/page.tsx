@@ -25,6 +25,24 @@ function ExplorePageContent() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(initialSearch)
   const [selectedTag, setSelectedTag] = useState(initialTag)
 
+  // Sync state with URL when it changes externally
+  useEffect(() => {
+    setSearchQuery(initialSearch)
+    setDebouncedSearchQuery(initialSearch)
+  }, [initialSearch])
+
+  // Sync searchQuery with URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (searchQuery) {
+      params.set('q', searchQuery)
+    } else {
+      params.delete('q')
+    }
+    // Use replace to avoid bloating history during typing
+    router.replace(`/explore?${params.toString()}`, { scroll: false })
+  }, [searchQuery])
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 500)
     return () => clearTimeout(timer)
@@ -140,19 +158,27 @@ function ExplorePageContent() {
                 <h1 className="text-2xl font-bold text-foreground">Explore</h1>
               </div>
               <p className="text-muted-foreground mb-6">
-                Discover trending discussions and topics across the ORBIT
+                Discover trending discussions and semantic topics across the ORBIT
               </p>
 
               {/* Search */}
               <div className="relative mb-6">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <Search className={cn(
+                  "absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors",
+                  debouncedSearchQuery ? "text-primary animate-pulse" : "text-muted-foreground"
+                )} />
                 <Input
                   type="search"
-                  placeholder="Search posts, topics, or users..."
+                  placeholder="Ask ORBIT something... (e.g. 'Future of AI' or 'Space exploration')"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 bg-secondary/30 border-border/50 focus:border-primary/50 h-12 text-base"
                 />
+                {debouncedSearchQuery && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 px-2 py-1 rounded bg-primary/10 border border-primary/20">
+                    <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Semantic Mode</span>
+                  </div>
+                )}
               </div>
 
               {/* Tags */}

@@ -41,15 +41,15 @@ async def get_posts(
         tag_filter = (literal(",") + models.Post.tags + literal(",")).contains(
             f",{tag},"
         )
-        query = query.where(tag_filter).order_by(models.Post.date_posted.desc())
+        query = query.where(tag_filter)
         count_query = count_query.where(tag_filter)
 
     if keyword:
         keyword_embedding = await model.aembed_query(keyword)
         keyword_filter = models.Post.embedding.cosine_distance(keyword_embedding)
         query = query.order_by(keyword_filter)
-    
-    if not tag and not keyword:
+
+    if not keyword:
         query = query.order_by(models.Post.date_posted.desc())
 
     count = await db.execute(count_query)

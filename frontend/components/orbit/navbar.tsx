@@ -107,7 +107,7 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
                 <div className="flex items-center">
                   <Input
                     type="search"
-                    placeholder="Search ORBIT..."
+                    placeholder="Ask ORBIT..."
                     className="pr-10 bg-secondary/50 border-border/50 focus:border-primary/50"
                     autoFocus
                     onBlur={() => setIsSearchOpen(false)}
