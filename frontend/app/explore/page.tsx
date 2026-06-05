@@ -111,31 +111,8 @@ function ExplorePageContent() {
 
   const user: User | null = rawUser ? mapUser(rawUser) : null
 
-  // Accumulate tags stably and avoid case-sensitive duplicates
-  const accumulatedTagsRef = useRef(new Map<string, string>([
-    ['ai', 'AI'],
-    ['technology', 'Technology'],
-    ['programming', 'Programming'],
-    ['science', 'Science'],
-    ['philosophy', 'Philosophy'],
-    ['web3', 'Web3'],
-    ['space', 'Space'],
-    ['future', 'Future']
-  ]))
-
-  // Extract all unique tags from real post data
-  const allAvailableTags = useMemo(() => {
-    posts.forEach(post => {
-      post.tags?.forEach(tag => {
-        if (!tag) return
-        const lower = tag.toLowerCase()
-        if (!accumulatedTagsRef.current.has(lower)) {
-          accumulatedTagsRef.current.set(lower, tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase())
-        }
-      })
-    })
-    return Array.from(accumulatedTagsRef.current.values()).sort()
-  }, [posts])
+  // Hardcoded tags to match the sidebar's "Galaxy Tags" exactly
+  const allAvailableTags = ['AI', 'Tech', 'Science', 'Philosophy', 'Coding', 'Space', 'Future', 'Web3']
 
   return (
     <div className="min-h-screen bg-background">

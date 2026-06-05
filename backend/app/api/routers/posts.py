@@ -38,8 +38,8 @@ async def get_posts(
 
 
     if tag:
-        tag_filter = (literal(",") + models.Post.tags + literal(",")).contains(
-            f",{tag},"
+        tag_filter = (literal(",") + models.Post.tags + literal(",")).ilike(
+            f"%,{tag},%"
         )
         query = query.where(tag_filter)
         count_query = count_query.where(tag_filter)
