@@ -17,7 +17,7 @@
 
 ## 🚀 Key Features
 
-- **Semantic & Hybrid Search:** Combine literal keyword matching with cosine similarity vector search using HNSW indexes.
+- **Semantic & Hybrid Search:** Combine literal keyword matching with cosine similarity vector search.
 - **Modern Full-Stack Architecture:** Fully async Python backend (FastAPI) paired with a modern Next.js 16 (App Router) frontend.
 - **Robust Authentication:** Secure JWT-based auth with password hashing via `argon2`.
 - **User Profiles & Avatars:** Complete profile management with local media storage.
@@ -47,7 +47,7 @@
 | **PostgreSQL & asyncpg** | Primary database with async driver | `>=0.31.0` |
 | **pgvector** | Open-source vector similarity search for Postgres | `>=0.4.2` |
 | **SQLAlchemy (Async)** | Modern ORM with `Mapped` typed columns | `>=2.0.50` |
-| **LangChain & HuggingFace**| Generates text embeddings (`all-mpnet-base-v2`) | `>=1.3.4` |
+| **Google Gemini API** | Generates text embeddings (`text-embedding-004`) | `^2.8.0` |
 | **Alembic** | Database migrations | `>=1.18.4` |
 
 ### Frontend
@@ -88,6 +88,7 @@ Create a `.env` file in the root directory for the backend and `frontend/.env.lo
 | `DATABASE_URL` | Async PostgreSQL connection string | `postgresql+asyncpg://user:pass@localhost/orbit` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | JWT token validity duration | `30` |
 | `ALLOWED_ORIGINS` | CORS origins | `http://localhost:3000` |
+| `GEMINI_API_KEY` | API key for Google Gemini Embedding API | `AIzaSy...` |
 
 **`frontend/.env.local` (Frontend):**
 | Variable | Description | Example |
@@ -135,7 +136,7 @@ Orbit/
 │   │       ├── auth/     # JWT creation and password hashing
 │   │       ├── config/   # Pydantic Settings
 │   │       └── db/       # SQLAlchemy models (User, Post)
-│   ├── embedding/        # HuggingFace embedding configuration
+│   ├── embedding/        # Google Gemini embedding configuration
 │   └── media/            # Uploaded static files (e.g., profile pictures)
 ├── frontend/
 │   ├── app/              # Next.js App Router pages (auth, create, profile, etc.)
@@ -173,8 +174,8 @@ graph TD
     Auth --> Router[API Routers]
     Router -->|SQLAlchemy| DB[(PostgreSQL)]
     
-    Router -->|LangChain| HuggingFace[HuggingFace Embeddings]
-    HuggingFace -->|768-dim Vector| DB
+    Router -->|Google GenAI| Gemini[Gemini Embedding API]
+    Gemini -->|3072-dim Vector| DB
 ```
 > **Note:** Client and Server Components are both part of the same Next.js application. Client Components run in the browser and handle interactivity; Server Components run on the server and are used for data fetching and initial renders.
 ---
@@ -215,14 +216,13 @@ Orbit implements a hybrid search approach, combining the precision of keyword ma
 sequenceDiagram
     participant User
     participant FastAPI
-    participant HuggingFace Model
+    participant Gemini API
     participant PostgreSQL (pgvector)
     
     User->>FastAPI: Search "?keyword=machine learning"
-    FastAPI->>HuggingFace Model: model.aembed_query("machine learning")
-    HuggingFace Model-->>FastAPI: Returns 768-dim vector [0.012, -0.98, ...]
+    FastAPI->>Gemini API: models.embed_content("machine learning")
+    Gemini API-->>FastAPI: Returns 3072-dim vector [0.012, -0.98, ...]
     FastAPI->>PostgreSQL (pgvector): Hybrid Query (Cosine Distance < 0.7 OR ILIKE)
-    Note right of PostgreSQL (pgvector): Uses HNSW Index for rapid<br>Approximate Nearest Neighbor search
     PostgreSQL (pgvector)-->>FastAPI: Returns relevant Post rows
     FastAPI-->>User: Paginated JSON Response
 ```
@@ -234,23 +234,16 @@ sequenceDiagram
 Orbit uses declarative SQLAlchemy 2.0 ORM models.
 
 - **`User` Table:** Stores authentication details (hashed passwords), profile metadata (bio, name), and an `image_file` reference for avatars.
-- **`Post` Table:** Stores the actual textual content, title, tags, and a highly critical `embedding` column. The `embedding` column is of type `Vector(768)` and uses an **HNSW (Hierarchical Navigable Small World)** index.
+- **`Post` Table:** Stores the actual textual content, title, tags, and an `embedding` column of type `Vector(3072)`.
 
 ```python
 # A highlight of the Post model showcasing pgvector integration
 class Post(Base):
     __tablename__ = "posts"
     # ...
-    embedding: Mapped[Vector] = mapped_column(Vector(768), nullable=True)
-
-    __table_args__ = (
-        Index(
-            "ix_posts_embedding",
-            "embedding",
-            postgresql_using="hnsw",
-            postgresql_ops={"embedding": "vector_cosine_ops"},
-            postgresql_with={"m": 16, "ef_construction": 64},
-        ),
+    embedding: Mapped[Vector] = mapped_column(
+        Vector(3072),
+        nullable=True,
     )
 ```
 
@@ -285,7 +278,7 @@ class Post(Base):
 ## 🎓 What I Learned
 
 Building Orbit provided deep insights into modern full-stack integrations:
-- **Vector Databases & LLMs:** Moving beyond traditional full-text search to implement `pgvector` and LangChain was a game-changer for information retrieval quality. Understanding HNSW indexing vs IVFFlat was crucial for optimizing query times.
+- **Vector Databases & LLMs:** Moving beyond traditional full-text search to implement `pgvector` and the Google Gemini API was a game-changer for information retrieval quality. Understanding vector similarity search was crucial for optimizing search results.
 - **Async Python:** Leveraging SQLAlchemy 2.0's async `Mapped` features with `asyncpg` allowed for non-blocking database operations, maximizing FastAPI's potential for high concurrency.
 - **Next.js 16 App Router:** Effectively mixing Server Components (for fast initial loads and SEO) and Client Components (for interactive elements like React Hook Form) requires a strong mental model of where code executes.
 - **Security:** Handling JWTs securely between an independent Python backend and a Next.js frontend, ensuring smooth session management alongside file uploads.
