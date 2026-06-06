@@ -27,7 +27,6 @@ app.add_middleware(
 )
 
 # mounting the directories
-app.mount("/static", StaticFiles(directory="./frontend/public"), name="static")
 app.mount("/media", StaticFiles(directory="./backend/media"), name="media")
 
 

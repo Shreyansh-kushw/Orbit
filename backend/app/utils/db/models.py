@@ -61,11 +61,11 @@ class User(Base):
     )
 
     @property
-    def image_path(self) -> str:
+    def image_path(self) -> str | None:
         if self.image_file:
             return f"/media/profile_pics/{self.image_file}"
 
-        return "/static/placeholder-user.jpg"
+        return None
 
 
 class Post(Base):

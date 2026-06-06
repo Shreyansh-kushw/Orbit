@@ -11,10 +11,8 @@ __pycache__/
 .ruff_cache/
 .mypy_cache/
 
-# Node.js
-frontend/node_modules/
-frontend/.next/
-frontend/out/
+# Frontend (completely ignored for backend-only container)
+frontend/
 node_modules/
 
 # Environment and Secrets

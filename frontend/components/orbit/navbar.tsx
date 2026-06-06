@@ -145,7 +145,14 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 px-0 py-5 hover:bg-secondary/80" style={{ cursor: 'pointer' }}>
                     <Avatar key={currentUser.avatar} className="w-8 h-8">
-                      <AvatarImage src={currentUser.avatar?.startsWith('http') ? currentUser.avatar : `${API_URL}${currentUser.avatar || ''}`} alt={currentUser.displayName} />
+                      <AvatarImage 
+                        src={
+                          currentUser.avatar?.startsWith('http') || currentUser.avatar?.startsWith('/') 
+                            ? currentUser.avatar 
+                            : `${API_URL}${currentUser.avatar || ''}`
+                        } 
+                        alt={currentUser.displayName} 
+                      />
                       <AvatarFallback>{currentUser.displayName?.[0] || 'U'}</AvatarFallback>
                     </Avatar>
                     <span className="hidden sm:block text-sm">{currentUser.displayName}</span>

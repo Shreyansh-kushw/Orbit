@@ -18,18 +18,16 @@ export function mapPost(post: PostApiResponse): Post {
       id: post.author.id,
       username: post.author.username,
       displayName: post.author.name,
-      avatar: post.author.image_path
+      avatar: post.author.image_path || '/placeholder-user.jpg'
     }
   }
 }
 
 export function mapUser(user: UserPublicApiResponse): User {
   return {
-
     id: user.id,
     username: user.username,
     displayName: user.name,
-    avatar: user.image_path
-
+    avatar: user.image_path || '/placeholder-user.jpg'
   }
 }
