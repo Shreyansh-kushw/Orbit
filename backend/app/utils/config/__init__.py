@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     database_url: str
     allowed_origins: list[str] = ["http://localhost:3000"]
+    gemini_api_key: str
 
     @field_validator("allowed_origins", mode="before")
     @classmethod

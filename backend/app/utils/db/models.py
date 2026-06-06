@@ -80,7 +80,7 @@ class Post(Base):
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     embedding: Mapped[Vector] = mapped_column(
-        Vector(768),
+        Vector(3072),
         nullable=True,
     )
 
@@ -96,13 +96,3 @@ class Post(Base):
     tags: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     author: Mapped[User] = relationship(back_populates="posts")
-
-    __table_args__ = (
-        Index(
-            "ix_posts_embedding",
-            "embedding",
-            postgresql_using="hnsw",
-            postgresql_ops={"embedding": "vector_cosine_ops"},
-            postgresql_with={"m": 16, "ef_construction": 64},
-        ),
-    )

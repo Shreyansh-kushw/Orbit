@@ -31,22 +31,23 @@ function ExplorePageContent() {
     setDebouncedSearchQuery(initialSearch)
   }, [initialSearch])
 
-  // Sync searchQuery with URL
+  // Sync searchQuery with URL after debounce
   useEffect(() => {
-    const params = new URLSearchParams(searchParams.toString())
-    if (searchQuery) {
-      params.set('q', searchQuery)
-    } else {
-      params.delete('q')
-    }
-    // Use replace to avoid bloating history during typing
-    router.replace(`/explore?${params.toString()}`, { scroll: false })
-  }, [searchQuery])
+    if (searchQuery === initialSearch) return
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 500)
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery)
+      const params = new URLSearchParams(searchParams.toString())
+      if (searchQuery) {
+        params.set('q', searchQuery)
+      } else {
+        params.delete('q')
+      }
+      router.replace(`/explore?${params.toString()}`, { scroll: false })
+    }, 800)
+
     return () => clearTimeout(timer)
-  }, [searchQuery])
+  }, [searchQuery, initialSearch, router, searchParams])
 
   const [posts, setPosts] = useState<Post[]>([])
   const [totalPosts, setTotalPosts] = useState(0)
@@ -55,6 +56,7 @@ function ExplorePageContent() {
   const [isLoadingPosts, setIsLoadingPosts] = useState(true)
   const [rawUser, setRawUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const limit = 10
 
@@ -73,9 +75,21 @@ function ExplorePageContent() {
   }
 
   const fetchPosts = async (currentSkip: number, reset = false, tagToFetch = '', keywordToFetch = '') => {
+    // Cancel any ongoing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    abortControllerRef.current = new AbortController()
+
     setIsLoadingPosts(true)
     try {
-      const response = await getPosts(currentSkip, limit, tagToFetch, keywordToFetch)
+      const response = await getPosts(
+        currentSkip, 
+        limit, 
+        tagToFetch, 
+        keywordToFetch, 
+        abortControllerRef.current.signal
+      )
       const newPosts = response.posts.map(mapPost)
       
       if (reset) {
@@ -87,7 +101,8 @@ function ExplorePageContent() {
       setTotalPosts(response.total)
       setHasMore(response.has_more)
       setSkip(currentSkip)
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === 'AbortError') return
       console.error("Error fetching posts:", error)
     } finally {
       setIsLoadingPosts(false)

@@ -17,7 +17,8 @@ from backend.app.api.schemas import (
     PostUpdate,
     PaginatedResponse,
 )
-from backend.embedding import model
+from backend.embedding import embed_content
+import asyncio
 
 app = APIRouter()
 
@@ -45,7 +46,7 @@ async def get_posts(
         count_query = count_query.where(tag_filter)
 
     if keyword:
-        keyword_embedding = await model.aembed_query(keyword)
+        keyword_embedding = await asyncio.to_thread(embed_content, keyword)
         keyword_filter = models.Post.embedding.cosine_distance(keyword_embedding)
         
         # Hybrid Filter: Semantic match OR literal keyword match
@@ -100,7 +101,7 @@ async def create_post(
         content=post.content,
         user_id=current_user.id,
         tags=post.tags,
-        embedding=await model.aembed_query(f"{post.title} {post.content}"),
+        embedding=await asyncio.to_thread(embed_content,(f"{post.title} {post.content}")),
     )
 
     db.add(new_post)
@@ -171,7 +172,7 @@ async def update_post(
     
     # Update embedding if title or content changed
     if post_data.title or post_data.content:
-        post.embedding = await model.aembed_query(f"{post.title} {post.content}")
+        post.embedding = await asyncio.to_thread(embed_content, f"{post.title} {post.content}")
     
     if post_data.tags:
         post.tags = post_data.tags
