@@ -2,7 +2,7 @@
 
 > A modern, full-stack social media platform built for connecting people and sharing ideas.
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Coming_Soon-blue?style=for-the-badge)]()
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Now-blue?style=for-the-badge)](https://orbit-one-flame.vercel.app/)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/Shreyansh-kushw/Orbit)
 
 **Orbit** is a full-stack social media application built with Next.js, FastAPI, and PostgreSQL. It supports user authentication, profile customization, post creation, media uploads, content feeds, and search functionality. The project was developed to explore scalable backend design, modern frontend development, and features commonly found in social networking platforms.
