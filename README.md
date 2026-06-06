@@ -11,10 +11,23 @@
 ## 🚀 Key Features
 
 - **Semantic & Hybrid Search:** Combine literal keyword matching with cosine similarity vector search using HNSW indexes.
-- **Modern Full-Stack Architecture:** Fully async Python backend (FastAPI) paired with a bleeding-edge Next.js 16 (App Router) frontend.
+- **Modern Full-Stack Architecture:** Fully async Python backend (FastAPI) paired with a modern Next.js 16 (App Router) frontend.
 - **Robust Authentication:** Secure JWT-based auth with password hashing via `argon2`.
 - **User Profiles & Avatars:** Complete profile management with local media storage.
 - **End-to-End Type Safety:** Pydantic (Backend) ↔ Zod (Frontend) validation.
+
+---
+
+## 📸 Screenshots 
+
+
+| Feed View | Sign Up |
+|---|---|
+| ![Feed](/assets/feed.png) | ![Profile](/assets/sign_up.png) |
+
+| Create Post | Profile |
+|---|---|
+| ![Create](/assets/create_post.png) | ![Search](/assets/profile.png) |
 
 ---
 
@@ -156,7 +169,7 @@ graph TD
     Router -->|LangChain| HuggingFace[HuggingFace Embeddings]
     HuggingFace -->|768-dim Vector| DB
 ```
-
+> **Note:** Client and Server Components are both part of the same Next.js application. Client Components run in the browser and handle interactivity; Server Components run on the server and are used for data fetching and initial renders.
 ---
 
 ## 📡 API Endpoints Reference
