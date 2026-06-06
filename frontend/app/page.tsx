@@ -6,6 +6,7 @@ import { mapPost, mapUser } from '@/lib/utils'
 import { getCurrentUser } from '@/lib/auth'
 import { User } from '@/lib/schemas'
 
+export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
 
