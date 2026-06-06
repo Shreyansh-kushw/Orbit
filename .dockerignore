@@ -11,19 +11,17 @@ __pycache__/
 .ruff_cache/
 .mypy_cache/
 
-# Node.js
-frontend/node_modules/
-frontend/.next/
-frontend/out/
+# Frontend
+frontend/
 node_modules/
 
-# Environment and Secrets
+# Environment
 .env
 .env.local
 .env.production
 .env.*.local
 
-# Database
+# Local databases
 database/
 *.db
 *.sqlite3
@@ -32,7 +30,20 @@ database/
 .DS_Store
 Thumbs.db
 
-# Development files
+# Development / docs
 README.md
 GEMINI.md
 
+# Editors
+.vscode/
+.idea/
+
+# Build artifacts
+dist/
+build/
+
+# Python packaging
+*.egg-info/
+
+# Docker
+docker-compose.yml
