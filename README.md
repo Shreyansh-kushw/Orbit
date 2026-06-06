@@ -4,12 +4,14 @@
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Now-blue?style=for-the-badge)](https://orbit-one-flame.vercel.app/)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github)](https://github.com/Shreyansh-kushw/Orbit)
-
+    
+      
 ![Python](https://img.shields.io/badge/Language-Python_|_TypeScript-3776AB?style=flat-square&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Frontend-Next.js-black?style=flat-square&logo=next.js)
 ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
-
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+     
 **Orbit** is a full-stack social media application built with Next.js, FastAPI, and PostgreSQL. It supports user authentication, profile customization, post creation, media uploads, content feeds, and search functionality. The project was developed to explore scalable backend design, modern frontend development, and features commonly found in social networking platforms.
 
 
