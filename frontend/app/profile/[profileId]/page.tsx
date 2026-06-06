@@ -28,6 +28,8 @@ import {
 } from '@/lib/api'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/orbit/empty-state'
+import { mapPost, mapUser } from '@/lib/utils'
+import { User as UserSchema } from '@/lib/schemas'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -36,8 +38,8 @@ export default function PublicProfilePage() {
   const idOrUsername = params.profileId as string
   const fileInputRef = useRef<HTMLInputElement>(null)
   
-  const [user, setUser] = useState<UserPublicApiResponse | null>(null)
-  const [currentUser, setCurrentUser] = useState<UserPublicApiResponse | null>(null)
+  const [user, setUser] = useState<UserSchema | null>(null)
+  const [currentUser, setCurrentUser] = useState<UserSchema | null>(null)
   const [userPosts, setUserPosts] = useState<PostApiResponse[]>([])
   const [totalPosts, setTotalPosts] = useState(0)
   const [skip, setSkip] = useState(0)
@@ -64,8 +66,8 @@ export default function PublicProfilePage() {
           getMe()
         ])
         
-        setUser(profileUser)
-        setCurrentUser(loggedInUser)
+        setUser(mapUser(profileUser))
+        setCurrentUser(loggedInUser ? mapUser(loggedInUser) : null)
         
         const response = await getUserPosts(profileUser.id, 0, limit)
         setUserPosts(response.posts)
@@ -130,24 +132,21 @@ export default function PublicProfilePage() {
     setIsUploadingAvatar(true)
     try {
       const updatedUser = await uploadAvatar(user.id, file)
+      const mappedUpdatedUser = mapUser(updatedUser)
       
       // Add a timestamp to force browser to re-fetch the new image
-      const cacheBustedPath = `${updatedUser.image_path}?v=${Date.now()}`
+      const cacheBustedPath = `${mappedUpdatedUser.avatar}?v=${Date.now()}`
       
       const timestampedUser = {
-        ...updatedUser,
-        image_path: cacheBustedPath
+        ...mappedUpdatedUser,
+        avatar: cacheBustedPath
       }
       
       setUser(timestampedUser)
       
       // Also update currentUser to reflect changes in Navbar immediately
       if (currentUser && currentUser.id === user.id) {
-        setCurrentUser({
-          ...timestampedUser,
-          avatar: cacheBustedPath,
-          displayName: timestampedUser.name
-        } as any)
+        setCurrentUser(timestampedUser)
       }
       
       toast.success("Profile picture updated successfully")
@@ -192,12 +191,7 @@ export default function PublicProfilePage() {
   if (error || !user) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        <Navbar isAuthenticated={!!currentUser} user={currentUser ? {
-          id: currentUser.id,
-          username: currentUser.username,
-          displayName: currentUser.name,
-          avatar: currentUser.image_path,
-        } : undefined} />
+        <Navbar isAuthenticated={!!currentUser} user={currentUser || undefined} />
         <div className="flex-1 flex items-center justify-center px-4">
           <div className="glass rounded-xl p-8 max-w-md w-full text-center">
             <div className="w-16 h-16 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto mb-4">
@@ -220,12 +214,7 @@ export default function PublicProfilePage() {
     <div className="min-h-screen bg-background">
       <Navbar 
         isAuthenticated={!!currentUser} 
-        user={currentUser ? {
-          id: currentUser.id,
-          username: currentUser.username,
-          displayName: currentUser.name,
-          avatar: currentUser.image_path,
-        } : undefined}
+        user={currentUser || undefined}
       />
       
       <main className="max-w-4xl mx-auto px-4 py-6">
@@ -254,13 +243,13 @@ export default function PublicProfilePage() {
                 className={`relative rounded-full ${isOwnProfile ? 'cursor-pointer' : ''}`}
                 onClick={handleAvatarClick}
               >
-                {/* We use image_path as a key to force re-render the entire Avatar when it changes */}
-                <Avatar key={user.image_path} className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-primary/30 overflow-hidden">
+                {/* We use avatar as a key to force re-render the entire Avatar when it changes */}
+                <Avatar key={user.avatar} className="w-28 h-28 md:w-36 md:h-36 ring-4 ring-primary/30 overflow-hidden">
                   <AvatarImage 
-                    src={user.image_path?.startsWith('http') ? user.image_path : `${API_URL}${user.image_path || ''}`} 
-                    alt={user.name} 
+                    src={user.avatar} 
+                    alt={user.displayName} 
                   />
-                  <AvatarFallback className="text-4xl">{user.name?.[0] || 'U'}</AvatarFallback>
+                  <AvatarFallback className="text-4xl">{user.displayName?.[0] || 'U'}</AvatarFallback>
                 </Avatar>
                 
                 {isOwnProfile && (
@@ -280,7 +269,7 @@ export default function PublicProfilePage() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                    {user.name}
+                    {user.displayName}
                   </h1>
                   <p className="text-muted-foreground">@{user.username}</p>
                 </div>
@@ -325,19 +314,7 @@ export default function PublicProfilePage() {
                 {userPosts.map((post) => (
                   <PostCard 
                     key={post.id} 
-                    post={{
-                      id: post.id,
-                      title: post.title,
-                      content: post.content,
-                      author: {
-                        id: post.author.id,
-                        username: post.author.username,
-                        displayName: post.author.name,
-                        avatar: post.author.image_path,
-                      },
-                      createdAt: new Date(post.date_posted),
-                      tags: post.tags ? post.tags.split(',') : []
-                    }} 
+                    post={mapPost(post)} 
                   />
                 ))}
 
@@ -367,7 +344,7 @@ export default function PublicProfilePage() {
                 title="No posts yet"
                 description={isOwnProfile 
                   ? "You haven't created any posts yet. Start sharing your thoughts!" 
-                  : `${user.name} hasn't posted anything yet.`}
+                  : `${user.displayName} hasn't posted anything yet.`}
                 action={isOwnProfile && (
                   <Button asChild className="bg-primary hover:bg-primary/90">
                     <Link href="/create">Create Your First Post</Link>

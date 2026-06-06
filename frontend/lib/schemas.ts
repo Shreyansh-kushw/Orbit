@@ -5,6 +5,9 @@ export interface User {
   username: string
   displayName: string
   avatar: string
+  bio?: string
+  date_joined?: string
+  email?: string
 }
 
 export interface Post {

@@ -45,6 +45,8 @@ import {
 } from '@/lib/api'
 import { toast } from 'sonner'
 import { logout } from '@/lib/auth'
+import { mapPost, mapUser } from '@/lib/utils'
+import { User as UserSchema } from '@/lib/schemas'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -52,7 +54,7 @@ export default function SettingsPage() {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   
-  const [user, setUser] = useState<(UserPublicApiResponse & { email: string }) | null>(null)
+  const [user, setUser] = useState<UserSchema | null>(null)
   const [userPosts, setUserPosts] = useState<PostApiResponse[]>([])
   const [totalPosts, setTotalPosts] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
@@ -78,12 +80,13 @@ export default function SettingsPage() {
           return
         }
         
-        setUser(userData as any)
+        const mappedUser = mapUser(userData)
+        setUser(mappedUser)
         setProfileData({
-          name: userData.name,
-          username: userData.username,
-          email: userData.email,
-          bio: (userData as any).bio || '',
+          name: mappedUser.displayName,
+          username: mappedUser.username,
+          email: mappedUser.email || '',
+          bio: mappedUser.bio || '',
         })
 
         const postsResponse = await getUserPosts(userData.id, 0, 100)
@@ -110,7 +113,7 @@ export default function SettingsPage() {
         email: profileData.email,
         bio: profileData.bio,
       })
-      setUser({ ...user, ...updated })
+      setUser(mapUser(updated))
       toast.success("Profile updated successfully")
     } catch (err: any) {
       setError(err.message || "Failed to update profile")
@@ -138,19 +141,14 @@ export default function SettingsPage() {
     setIsUploadingAvatar(true)
     try {
       const updatedUser = await uploadAvatar(user.id, file)
-
-      // Ensure image_path exists before trying to manipulate it
-      const rawPath = updatedUser.image_path || user.image_path || ''
+      const mappedUpdatedUser = mapUser(updatedUser)
 
       // Add a timestamp to the image path to force browser to re-fetch the new image
-      const fullPath = rawPath.includes('?') 
-        ? `${rawPath}&t=${Date.now()}`
-        : `${rawPath}?t=${Date.now()}`
+      const fullPath = `${mappedUpdatedUser.avatar}?t=${Date.now()}`
 
       setUser({ 
-        ...user, 
-        ...updatedUser,
-        image_path: fullPath
+        ...mappedUpdatedUser,
+        avatar: fullPath
       })
       toast.success("Profile picture updated successfully")
     } catch (err: any) {
@@ -200,12 +198,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-background">
       <Navbar 
         isAuthenticated={true} 
-        user={{
-          id: user.id,
-          username: user.username,
-          displayName: user.name,
-          avatar: user.image_path,
-        }}
+        user={user}
       />
       
       <main className="max-w-5xl mx-auto px-4 py-6">
@@ -236,9 +229,9 @@ export default function SettingsPage() {
                     className="relative rounded-full cursor-pointer"
                     onClick={handleAvatarClick}
                   >
-                    <Avatar key={user.image_path} className="w-24 h-24 mx-auto ring-4 ring-primary/30 overflow-hidden">
-                      <AvatarImage src={user.image_path?.startsWith('http') ? user.image_path : `${API_URL}${user.image_path || ''}`} alt={user.name} />
-                      <AvatarFallback className="text-3xl">{user.name[0]}</AvatarFallback>
+                    <Avatar key={user.avatar} className="w-24 h-24 mx-auto ring-4 ring-primary/30 overflow-hidden">
+                      <AvatarImage src={user.avatar} alt={user.displayName} />
+                      <AvatarFallback className="text-3xl">{user.displayName?.[0] || 'U'}</AvatarFallback>
                     </Avatar>
                     
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
@@ -251,7 +244,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 
-                <h2 className="text-xl font-bold text-foreground mt-4">{user.name}</h2>
+                <h2 className="text-xl font-bold text-foreground mt-4">{user.displayName}</h2>
                 <p className="text-muted-foreground mb-1">@{user.username}</p>
                 <p className="text-sm text-muted-foreground mb-3 px-4 italic line-clamp-2">
                   &quot;{user.bio}&quot;
@@ -295,19 +288,7 @@ export default function SettingsPage() {
                   userPosts.map((post) => (
                     <PostCard 
                       key={post.id} 
-                      post={{
-                        id: post.id,
-                        title: post.title,
-                        content: post.content,
-                        author: {
-                          id: post.author.id,
-                          username: post.author.username,
-                          displayName: post.author.name,
-                          avatar: post.author.image_path,
-                        },
-                        createdAt: new Date(post.date_posted),
-                        tags: post.tags ? post.tags.split(',') : []
-                      }} 
+                      post={mapPost(post)} 
                     />
                   ))
                 ) : (

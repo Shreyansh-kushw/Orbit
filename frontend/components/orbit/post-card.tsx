@@ -44,8 +44,11 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
         <div className="flex items-center gap-3">
           <Link href={`/profile/@${post.author.username}`}>
             <Avatar className="w-12 h-12 ring-2 ring-transparent group-hover:ring-primary/30 transition-all">
-              <AvatarImage src={post.author.avatar.startsWith('http') ? post.author.avatar : `${API_URL}${post.author.avatar}`} alt={post.author.displayName} />
-              <AvatarFallback>{post.author.displayName[0]}</AvatarFallback>
+              <AvatarImage 
+                src={post.author.avatar} 
+                alt={post.author.displayName} 
+              />
+              <AvatarFallback>{post.author.displayName?.[0] || 'U'}</AvatarFallback>
             </Avatar>
           </Link>
           <div>

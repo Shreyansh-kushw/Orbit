@@ -121,8 +121,11 @@ export default function PostPage() {
                 <div className="flex items-center gap-4">
                   <Link href={`/profile/@${post.author.username}`}>
                     <Avatar className="w-14 h-14 ring-2 ring-primary/30">
-                      <AvatarImage src={post.author.avatar.startsWith('http') ? post.author.avatar : `${API_URL}${post.author.avatar}`} alt={post.author.displayName} />
-                      <AvatarFallback>{post.author.displayName[0]}</AvatarFallback>
+                      <AvatarImage 
+                        src={post.author.avatar} 
+                        alt={post.author.displayName} 
+                      />
+                      <AvatarFallback>{post.author.displayName?.[0] || 'U'}</AvatarFallback>
                     </Avatar>
                   </Link>
                   <div>

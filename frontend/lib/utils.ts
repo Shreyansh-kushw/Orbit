@@ -3,8 +3,20 @@ import { twMerge } from 'tailwind-merge'
 import { User, Post } from './schemas'
 import { PostApiResponse, UserPublicApiResponse } from './api'
 
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '')
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+export function getAvatarUrl(path: string | null | undefined): string {
+  if (!path || path === '' || path === 'null') return '/placeholder-user.jpg'
+  if (path.startsWith('http')) return path
+  if (path.startsWith('/placeholder')) return path
+
+  // For backend paths starting with /media
+  const cleanPath = path.startsWith('/') ? path : `/${path}`
+  return `${API_URL}${cleanPath}`
 }
 
 export function mapPost(post: PostApiResponse): Post {
@@ -18,7 +30,7 @@ export function mapPost(post: PostApiResponse): Post {
       id: post.author.id,
       username: post.author.username,
       displayName: post.author.name,
-      avatar: post.author.image_path || '/placeholder-user.jpg'
+      avatar: getAvatarUrl(post.author.image_path)
     }
   }
 }
@@ -28,6 +40,9 @@ export function mapUser(user: UserPublicApiResponse): User {
     id: user.id,
     username: user.username,
     displayName: user.name,
-    avatar: user.image_path || '/placeholder-user.jpg'
+    avatar: getAvatarUrl(user.image_path),
+    bio: user.bio,
+    date_joined: user.date_joined,
+    email: user.email
   }
 }
