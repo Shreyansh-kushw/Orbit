@@ -15,6 +15,10 @@ __pycache__/
 frontend/
 node_modules/
 
+# Ensure media directory exists in build context
+!backend/media/
+!backend/media/**
+
 # Environment and Secrets
 .env
 .env.local

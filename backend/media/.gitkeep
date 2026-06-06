@@ -1,0 +1,4 @@
+# This file ensures that the media directory is tracked by Git
+# even if it is otherwise empty. This is necessary for the 
+# backend to start successfully in environments like Render
+# where the directory must exist for FastAPI mounting.
