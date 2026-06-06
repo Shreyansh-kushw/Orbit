@@ -12,7 +12,7 @@ export interface UserPublicApiResponse {
     bio: string
     date_joined: string
     image_file: string | null
-    image_path: string
+    image_path: string | null
 }
 
 export interface PostApiResponse {

@@ -39,7 +39,7 @@ class UserPublic(BaseModel):
     date_joined: datetime
     bio: str
     image_file: str | None
-    image_path: str
+    image_path: str | None
 
 
 class UserPrivate(UserPublic):
