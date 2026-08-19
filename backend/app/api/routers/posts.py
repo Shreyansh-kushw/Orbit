@@ -46,18 +46,44 @@ async def get_posts(
         count_query = count_query.where(tag_filter)
 
     if keyword:
-        keyword_embedding = await asyncio.to_thread(embed_content, keyword)
-        keyword_filter = models.Post.embedding.cosine_distance(keyword_embedding)
-        
-        # Hybrid Filter: Semantic match OR literal keyword match
-        hybrid_condition = or_(
-            keyword_filter < 0.7,
-            models.Post.title.icontains(keyword),
-            models.Post.content.icontains(keyword)
-        )
-        
-        query = query.where(hybrid_condition).order_by(keyword_filter)
-        count_query = count_query.where(hybrid_condition)
+        try:
+            """Adding a error handling block to switch to keyword matching in case of embedding failures."""
+
+            keyword_embedding = await asyncio.to_thread(embed_content, keyword)
+            keyword_filter = models.Post.embedding.cosine_distance(keyword_embedding)
+            
+            # Hybrid Filter: Semantic match OR literal keyword match
+            hybrid_condition = or_(
+                keyword_filter < 0.7,
+                models.Post.title.icontains(keyword),
+                models.Post.content.icontains(keyword)
+            )
+            
+            # query = query.where(hybrid_condition).order_by(keyword_filter)
+            query = query.where(hybrid_condition).order_by(keyword_filter.asc().nulls_last())
+            # THINKING BEHIND THIS ABOVE CHANGE - 
+            # With regards to the probability of failure in the embedding process of the posts,
+            # there is a chance that some post might be created but corresponsing field for its embedding be
+            # left NULL.
+            # IN such cases if while searching the database, if a post is encountered which successfully
+            # matches the keywords but has its embedding NULL, it would break the order_by method 
+            # and thus these posts may be unexpectedly ordered in the returned list. 
+            # 
+            # So therefore, we will enforce two new methods, one is ascending (to enforce ascending order, ie
+            # the closer to the original meaning the better)
+            # And also another nulls_last() method to place all the NULL embeddings posts at the last of the returned
+            # response.  
+
+            count_query = count_query.where(hybrid_condition)
+
+        except Exception as e:
+            print(f"Error embedding keyword: {e}")
+            keyword_filter = or_(
+                models.Post.title.icontains(keyword),
+                model.Post.content.icontains(keyword),
+            )
+            query = query.where(keyword_filter).order_by(models.Post.date_posted.desc())
+            count_query = count_query.where(keyword_filter)
 
     if not keyword:
         query = query.order_by(models.Post.date_posted.desc())
