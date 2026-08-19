@@ -114,7 +114,18 @@ export function Navbar({ isAuthenticated = true, user }: NavbarProps) {
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         setIsSearchOpen(false)
-                        router.push(`/explore?q=${encodeURIComponent(e.currentTarget.value)}`)
+                        const val = e.currentTarget.value.trim()
+                        if (pathname === '/explore') {
+                          const searchParams = new URLSearchParams(window.location.search)
+                          if (val) {
+                            searchParams.set('q', val)
+                          } else {
+                            searchParams.delete('q')
+                          }
+                          router.push(`/explore?${searchParams.toString()}`)
+                        } else {
+                          router.push(`/explore?q=${encodeURIComponent(val)}`)
+                        }
                       }
                     }}
                   />

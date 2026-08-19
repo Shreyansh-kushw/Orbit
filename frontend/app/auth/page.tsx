@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import Cookies from 'js-cookie';
 import { getCurrentUser } from '@/lib/auth'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const EXPIRE_MINS: number = parseInt(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || "60", 10)
 
 function AuthPageContent() {

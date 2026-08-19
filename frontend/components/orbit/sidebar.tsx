@@ -1,20 +1,40 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
-import { TrendingUp, Users, BarChart3, Hash, ExternalLink } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import { useSearchParams } from 'next/navigation'
+import { BarChart3, Hash, ExternalLink } from 'lucide-react'
 import { getTotalUsers, getTotalPosts } from '@/lib/api'
+import { cn } from '@/lib/utils'
 
-export function Sidebar() {
+function SidebarContent() {
   const [totalUsers, setTotalUsers] = useState<number>(0)
   const [totalPosts, setTotalPosts] = useState<number>(0)
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     getTotalUsers().then(setTotalUsers).catch(console.error)
     getTotalPosts().then(setTotalPosts).catch(console.error)
   }, [])
+
+  const currentQuery = searchParams.get('q') || ''
+  const currentTag = searchParams.get('tag') || ''
+
+  const getTagHref = (tag: string) => {
+    const params = new URLSearchParams()
+    const isSelected = currentTag.toLowerCase() === tag.toLowerCase()
+
+    // Toggle off if already selected
+    if (!isSelected) {
+      params.set('tag', tag)
+    }
+    if (currentQuery) {
+      params.set('q', currentQuery)
+    }
+
+    const queryStr = params.toString()
+    return `/explore${queryStr ? `?${queryStr}` : ''}`
+  }
 
   return (
     <aside className="w-80 flex-shrink-0 hidden lg:block">
@@ -54,15 +74,23 @@ export function Sidebar() {
             <h3 className="font-bold text-lg text-foreground">Galaxy Tags</h3>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            {['AI', 'Tech', 'Science', 'Philosophy', 'Coding', 'Space', 'Future', 'Web3'].map((tag) => (
-              <Link
-                key={tag}
-                href={`/explore?tag=${tag}`}
-                className="px-4 py-3 rounded-xl bg-secondary/30 border border-border/50 text-sm font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/50 transition-all text-center capitalize"
-              >
-                #{tag}
-              </Link>
-            ))}
+            {['AI', 'Tech', 'Science', 'Philosophy', 'Coding', 'Space', 'Future', 'Web3'].map((tag) => {
+              const isSelected = currentTag.toLowerCase() === tag.toLowerCase()
+              return (
+                <Link
+                  key={tag}
+                  href={getTagHref(tag)}
+                  className={cn(
+                    "px-4 py-3 rounded-xl border text-sm font-medium transition-all text-center capitalize",
+                    isSelected
+                      ? "bg-primary text-primary-foreground border-primary glow-primary"
+                      : "bg-secondary/30 border-border/50 text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/50"
+                  )}
+                >
+                  #{tag}
+                </Link>
+              )
+            })}
           </div>
         </div>
 
@@ -85,6 +113,14 @@ export function Sidebar() {
   )
 }
 
+export function Sidebar() {
+  return (
+    <Suspense fallback={<aside className="w-80 flex-shrink-0 hidden lg:block" />}>
+      <SidebarContent />
+    </Suspense>
+  )
+}
+
 function formatNumber(num: number): string {
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + 'M'
@@ -94,3 +130,4 @@ function formatNumber(num: number): string {
   }
   return num.toString()
 }
+

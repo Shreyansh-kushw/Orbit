@@ -27,7 +27,7 @@ import { mapUser, mapPost } from '@/lib/utils'
 import { getPostsByID } from '@/lib/api'
 import Cookies from 'js-cookie'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export default function EditPostPage() {
   const router = useRouter()

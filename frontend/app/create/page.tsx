@@ -15,7 +15,7 @@ import { User } from '@/lib/schemas'
 import { mapUser } from '@/lib/utils'
 import Cookies from 'js-cookie';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export default function CreatePostPage() {
   const router = useRouter()

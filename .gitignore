@@ -7,7 +7,7 @@ __v0_jsx-dev-runtime.ts
 .vercel/
 
 # Environment variables
-.env*.local
+.envlocal
 
 node_modules/
 .next/

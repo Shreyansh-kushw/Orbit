@@ -18,42 +18,43 @@ import { EmptyState } from '@/components/orbit/empty-state'
 function ExplorePageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const initialTag = searchParams.get('tag') || ''
-  const initialSearch = searchParams.get('q') || ''
 
-  const [searchQuery, setSearchQuery] = useState(initialSearch)
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(initialSearch)
-  const [selectedTag, setSelectedTag] = useState(initialTag)
+  const currentTag = searchParams.get('tag') || ''
+  const currentQuery = searchParams.get('q') || ''
 
-  // Sync state with URL when it changes externally
+  const [searchQuery, setSearchQuery] = useState(currentQuery)
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(currentQuery)
+
+  // Sync local search input state when URL `q` changes externally (e.g., clear filters, back button)
   useEffect(() => {
-    setSearchQuery(initialSearch)
-    setDebouncedSearchQuery(initialSearch)
-  }, [initialSearch])
+    setSearchQuery(currentQuery)
+    setDebouncedSearchQuery(currentQuery)
+  }, [currentQuery])
 
-  // Sync searchQuery with URL after debounce
+  // Sync searchQuery with URL after debounce while preserving current tag
   useEffect(() => {
-    if (searchQuery === initialSearch) return
+    if (searchQuery === currentQuery) return
 
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery)
       const params = new URLSearchParams(searchParams.toString())
-      if (searchQuery) {
-        params.set('q', searchQuery)
+      if (searchQuery.trim()) {
+        params.set('q', searchQuery.trim())
       } else {
         params.delete('q')
       }
       router.replace(`/explore?${params.toString()}`, { scroll: false })
-    }, 800)
+    }, 400)
 
     return () => clearTimeout(timer)
-  }, [searchQuery, initialSearch, router, searchParams])
+  }, [searchQuery, currentQuery, router, searchParams])
 
   const [posts, setPosts] = useState<Post[]>([])
   const [totalPosts, setTotalPosts] = useState(0)
   const [skip, setSkip] = useState(0)
   const [hasMore, setHasMore] = useState(false)
   const [isLoadingPosts, setIsLoadingPosts] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [rawUser, setRawUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -61,10 +62,12 @@ function ExplorePageContent() {
   const limit = 10
 
   const handleTagSelect = (tag: string) => {
-    // If the tag is already selected, unselect it (set to '')
-    const newTag = selectedTag === tag ? '' : tag
+    let newTag = ''
+    if (tag) {
+      // Toggle off if clicking the already selected tag (case-insensitive check)
+      newTag = currentTag.toLowerCase() === tag.toLowerCase() ? '' : tag
+    }
     
-    setSelectedTag(newTag)
     const params = new URLSearchParams(searchParams.toString())
     if (newTag) {
       params.set('tag', newTag)
@@ -82,6 +85,7 @@ function ExplorePageContent() {
     abortControllerRef.current = new AbortController()
 
     setIsLoadingPosts(true)
+    setFetchError(null)
     try {
       const response = await getPosts(
         currentSkip, 
@@ -104,20 +108,20 @@ function ExplorePageContent() {
     } catch (error: any) {
       if (error.name === 'AbortError') return
       console.error("Error fetching posts:", error)
+      setFetchError(error.message || "Failed to fetch search results")
     } finally {
       setIsLoadingPosts(false)
     }
   }
 
-  // Sync selectedTag with URL query parameter and fetch
+  // Fetch posts whenever currentTag or debouncedSearchQuery changes
   useEffect(() => {
-    setSelectedTag(initialTag)
-    fetchPosts(0, true, initialTag, debouncedSearchQuery)
-  }, [initialTag, debouncedSearchQuery])
+    fetchPosts(0, true, currentTag, debouncedSearchQuery)
+  }, [currentTag, debouncedSearchQuery])
 
   const handleLoadMore = () => {
     if (hasMore && !isLoadingPosts) {
-      fetchPosts(skip + limit, false, selectedTag, debouncedSearchQuery)
+      fetchPosts(skip + limit, false, currentTag, debouncedSearchQuery)
     }
   }
 
@@ -180,7 +184,7 @@ function ExplorePageContent() {
                   onClick={() => handleTagSelect('')}
                   className={cn(
                     "rounded-full transition-all",
-                    selectedTag === '' 
+                    currentTag === '' 
                       ? "bg-primary text-primary-foreground border-primary glow-primary" 
                       : "hover:bg-primary/10 hover:text-primary hover:border-primary/50"
                   )}
@@ -195,7 +199,7 @@ function ExplorePageContent() {
                     onClick={() => handleTagSelect(tag)}
                     className={cn(
                       "rounded-full transition-all capitalize border-border/50",
-                      selectedTag.toLowerCase() === tag.toLowerCase() 
+                      currentTag.toLowerCase() === tag.toLowerCase() 
                         ? "bg-primary text-primary-foreground border-primary glow-primary hover:bg-primary/90 hover:text-primary-foreground" 
                         : "hover:bg-primary/10 hover:text-primary hover:border-primary/50"
                     )}
@@ -211,7 +215,7 @@ function ExplorePageContent() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-foreground flex items-center">
-                  <span className="capitalize">{selectedTag ? `#${selectedTag}` : 'All Posts'}</span>
+                  <span className="capitalize">{currentTag ? `#${currentTag}` : 'All Posts'}</span>
                   {isLoadingPosts ? (
                     <Loader2 className="w-4 h-4 ml-3 animate-spin text-muted-foreground" />
                   ) : (
@@ -226,6 +230,20 @@ function ExplorePageContent() {
                 <div className="flex justify-center py-12">
                   <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                 </div>
+              ) : fetchError ? (
+                <EmptyState
+                  icon={<Search className="w-12 h-12 text-destructive" />}
+                  title="Search Temporarily Unavailable"
+                  description={fetchError}
+                  action={
+                    <Button 
+                      variant="outline" 
+                      onClick={() => fetchPosts(0, true, currentTag, debouncedSearchQuery)}
+                    >
+                      Retry Search
+                    </Button>
+                  }
+                />
               ) : posts.length > 0 ? (
                 <>
                   {posts.map(post => (
@@ -263,7 +281,8 @@ function ExplorePageContent() {
                       variant="outline" 
                       onClick={() => {
                         setSearchQuery('')
-                        handleTagSelect('')
+                        setDebouncedSearchQuery('')
+                        router.push('/explore', { scroll: false })
                       }}
                     >
                       Clear all filters
