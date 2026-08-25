@@ -80,7 +80,7 @@ class Post(Base):
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     embedding: Mapped[Vector] = mapped_column(
-        Vector(3072),
+        Vector(1536),
         nullable=True,
     )
 
@@ -96,3 +96,29 @@ class Post(Base):
     tags: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     author: Mapped[User] = relationship(back_populates="posts")
+
+    __table_args__ = ( # used to define additional arguments when creating a table
+    # when we need to create a index for a normal column, we can just use index=True argument
+    # but for a vector column index, we need to create it manually using sqlalchemy.Index
+        Index(
+            "ix_posts_embedding", # name of the index
+            "embedding", # name of the column whose index is this
+            postgresql_using="hnsw", # the method to use for creating index
+            postgresql_ops="vector_cosine_ops", # the operator to use for comparing vectors
+            postgresql_ops={
+                "m" : 16, # number of neighbors for each node
+                "ef_construction": 64 # number of visited nodes during construction
+            }
+        )
+    )
+
+# For vector indexes- there are generally two main methods -> HNSW or IVFFlat
+# It is generally more common and has better query performance but uses a bit more memory + slower build
+# Slower build means the databse takes somewhat long time to create the hnsw index for the first time
+# which is expected, and this is normal.
+
+# For postgresql_ops - it means the operators used to compare the distances -
+# Options are -
+    # Cosine distance () -> here we are using this one.
+    # L2 distance ()
+    # Inner product ()

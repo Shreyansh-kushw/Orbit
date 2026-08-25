@@ -9,7 +9,8 @@ def embed_content(text):
 
     response = client.models.embed_content(
             model="gemini-embedding-2",
-            contents=text
+            contents=text,
+            output_dimensionality=1536
     )
 
     return response.embeddings[0].values
