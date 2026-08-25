@@ -1,4 +1,5 @@
 from google import genai
+from google.genai import types
 from backend.app.utils.config import settings
 
 client = genai.Client(api_key=settings.gemini_api_key)
@@ -10,7 +11,9 @@ def embed_content(text):
     response = client.models.embed_content(
             model="gemini-embedding-2",
             contents=text,
+            config=types.EmbedContentConfig(
             output_dimensionality=1536
+        ),
     )
 
     return response.embeddings[0].values
