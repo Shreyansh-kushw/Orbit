@@ -45,9 +45,9 @@
 |---|---|---|
 | **FastAPI** | High-performance async Python web framework | `>=0.136.3` |
 | **PostgreSQL & asyncpg** | Primary database with async driver | `>=0.31.0` |
-| **pgvector** | Open-source vector similarity search for Postgres | `>=0.4.2` |
+| **pgvector** | Open-source vector similarity search for Postgres (HNSW index) | `>=0.4.2` |
 | **SQLAlchemy (Async)** | Modern ORM with `Mapped` typed columns | `>=2.0.50` |
-| **Google Gemini API** | Generates text embeddings (`text-embedding-004`) | `^2.8.0` |
+| **Google Gemini API** | Generates text embeddings (`gemini-embedding-2`, 1536-dim) | `^2.8.0` |
 | **Alembic** | Database migrations | `>=1.18.4` |
 
 ### Frontend
@@ -136,8 +136,9 @@ Orbit/
 │   │       ├── auth/     # JWT creation and password hashing
 │   │       ├── config/   # Pydantic Settings
 │   │       └── db/       # SQLAlchemy models (User, Post)
-│   ├── embedding/        # Google Gemini embedding configuration
-│   └── media/            # Uploaded static files (e.g., profile pictures)
+│   ├── embedding/        # Google Gemini embedding configuration (gemini-embedding-2)
+│   ├── media/            # Uploaded static files (e.g., profile pictures)
+│   └── scripts/          # Utility scripts (backpopulate_embeddings.py)
 ├── frontend/
 │   ├── app/              # Next.js App Router pages (auth, create, profile, etc.)
 │   ├── components/       # Reusable React components (orbit/ and ui/)
@@ -172,10 +173,10 @@ graph TD
     
     API -->|JWT Validation| Auth[Auth Middleware]
     Auth --> Router[API Routers]
-    Router -->|SQLAlchemy| DB[(PostgreSQL)]
+    Router -->|SQLAlchemy| DB[(PostgreSQL + pgvector)]
     
     Router -->|Google GenAI| Gemini[Gemini Embedding API]
-    Gemini -->|3072-dim Vector| DB
+    Gemini -->|1536-dim Vector| DB
 ```
 > **Note:** Client and Server Components are both part of the same Next.js application. Client Components run in the browser and handle interactivity; Server Components run on the server and are used for data fetching and initial renders.
 ---
@@ -221,11 +222,16 @@ sequenceDiagram
     
     User->>FastAPI: Search "?keyword=machine learning"
     FastAPI->>Gemini API: models.embed_content("machine learning")
-    Gemini API-->>FastAPI: Returns 3072-dim vector [0.012, -0.98, ...]
-    FastAPI->>PostgreSQL (pgvector): Hybrid Query (Cosine Distance < 0.7 OR ILIKE)
-    PostgreSQL (pgvector)-->>FastAPI: Returns relevant Post rows
+    Gemini API-->>FastAPI: Returns 1536-dim vector [0.012, -0.98, ...]
+    FastAPI->>PostgreSQL (pgvector): Hybrid Query (Cosine Distance < 0.35 OR Regex Word Match / Title Match)
+    PostgreSQL (pgvector)-->>FastAPI: Returns relevant Post rows (ordered by cosine distance)
     FastAPI-->>User: Paginated JSON Response
 ```
+
+- **Semantic Filtering:** Generates a 1536-dimensional embedding with `gemini-embedding-2` and filters via pgvector using a calibrated cosine distance threshold (`< 0.35`).
+- **Literal Keyword Matching:** Uses PostgreSQL word-boundary regex (`\y{keyword}`) on post content and case-insensitive matching (`icontains`) on post titles.
+- **Optimized Ordering:** Sorts results by `cosine_distance.asc().nulls_last()` so the most relevant matches appear first while safely placing any NULL embeddings at the end.
+- **HNSW Index Acceleration:** Vector searches utilize a PostgreSQL HNSW index (`vector_cosine_ops`) for fast approximate nearest neighbors (ANN) retrieval.
 
 ---
 
@@ -234,16 +240,26 @@ sequenceDiagram
 Orbit uses declarative SQLAlchemy 2.0 ORM models.
 
 - **`User` Table:** Stores authentication details (hashed passwords), profile metadata (bio, name), and an `image_file` reference for avatars.
-- **`Post` Table:** Stores the actual textual content, title, tags, and an `embedding` column of type `Vector(3072)`.
+- **`Post` Table:** Stores the actual textual content, title, tags, and an `embedding` column of type `Vector(1536)` with an HNSW cosine index.
 
 ```python
-# A highlight of the Post model showcasing pgvector integration
+# A highlight of the Post model showcasing pgvector integration with HNSW index
 class Post(Base):
     __tablename__ = "posts"
     # ...
     embedding: Mapped[Vector] = mapped_column(
-        Vector(3072),
+        Vector(1536),
         nullable=True,
+    )
+
+    __table_args__ = (
+        Index(
+            "ix_posts_embedding",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+            postgresql_with={"m": 16, "ef_construction": 64},
+        ),
     )
 ```
 
