@@ -39,9 +39,13 @@ async def get_posts(
 
 
     if tag:
-        tag_filter = (literal(",") + models.Post.tags + literal(",")).ilike(
+        tag_filter = (literal(",") + func.coalesce(models.Post.tags, '') + literal(",")).ilike(
             f"%,{tag},%"
         )
+        # problem. if for a post, tags are NULL, then the tag filter would be evaluated to be NULL as well.
+        # thus, these posts would never really be evaluated in the results.
+        # solution , replacing the NULL value for no tags with an '' (empty string).
+        
         query = query.where(tag_filter)
         count_query = count_query.where(tag_filter)
 
@@ -209,7 +213,7 @@ async def update_post(
                 detail="Error embedding post content, {}".format(e),
             )
     
-    if post_data.tags:
+    if post_data.tags is not None: # because if use removes all tags then this becomes empty list and not None, so just checking for None is enough to know if the tags were changed or not
         post.tags = post_data.tags
 
     await db.commit()
