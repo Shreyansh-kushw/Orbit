@@ -19,6 +19,7 @@ from backend.app.api.schemas import (
 )
 from backend.embedding import embed_content
 import asyncio
+import re
 
 app = APIRouter()
 
@@ -26,8 +27,8 @@ app = APIRouter()
 @app.get("", response_model=PaginatedResponse)
 async def get_posts(
     db: Annotated[AsyncSession, Depends(get_db)],
-    tag: Annotated[str, Query] = "",
-    keyword: Annotated[str, Query] = "",
+    tag: Annotated[str, Query()] = "",
+    keyword: Annotated[str, Query()] = "",
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
@@ -37,6 +38,8 @@ async def get_posts(
     query = select(models.Post)
     count_query = select(func.count()).select_from(models.Post)
 
+    tag = tag.strip() if tag else ""
+    keyword = keyword.strip() if keyword else ""
 
     if tag:
         tag_filter = (literal(",") + func.coalesce(models.Post.tags, '') + literal(",")).ilike(
@@ -50,17 +53,23 @@ async def get_posts(
         count_query = count_query.where(tag_filter)
 
     if keyword:
+        escaped_keyword = re.escape(keyword)
+        word_boundary_pattern = f"\\y{escaped_keyword}"
+        keyword_literal_condition = or_(
+            models.Post.title.icontains(keyword),
+            models.Post.content.op("~*")(word_boundary_pattern),
+        )
+
         try:
-            """Adding a error handling block to switch to keyword matching in case of embedding failures."""
+            """Adding an error handling block to switch to keyword matching in case of embedding failures."""
 
             keyword_embedding = await asyncio.to_thread(embed_content, keyword)
             keyword_filter = models.Post.embedding.cosine_distance(keyword_embedding)
             
-            # Hybrid Filter: Semantic match OR literal keyword match
+            # Hybrid Filter: Semantic match (cosine distance < 0.35) OR literal keyword match
             hybrid_condition = or_(
-                keyword_filter < 0.7,
-                models.Post.title.icontains(keyword),
-                models.Post.content.icontains(keyword)
+                keyword_filter < 0.35,
+                keyword_literal_condition,
             )
             
             # query = query.where(hybrid_condition).order_by(keyword_filter)
@@ -82,12 +91,8 @@ async def get_posts(
 
         except Exception as e:
             print(f"Error embedding keyword: {e}")
-            keyword_filter = or_(
-                models.Post.title.icontains(keyword),
-                models.Post.content.icontains(keyword),
-            )
-            query = query.where(keyword_filter).order_by(models.Post.date_posted.desc())
-            count_query = count_query.where(keyword_filter)
+            query = query.where(keyword_literal_condition).order_by(models.Post.date_posted.desc())
+            count_query = count_query.where(keyword_literal_condition)
 
     if not keyword:
         query = query.order_by(models.Post.date_posted.desc())
