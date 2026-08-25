@@ -34,6 +34,7 @@ export default function PostPage() {
   const [authLoading, setAuthLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const token = Cookies.get('access_token')
 
@@ -83,9 +84,17 @@ export default function PostPage() {
     user.username === post.author.username
   )
 
-  const handleDelete = async (postId: string) => {
-    await deletePost(postId, token)
-    router.push('/')
+  const handleDelete = async (postIdToDelete: string) => {
+    if (isDeleting) return
+    setIsDeleting(true)
+    try {
+      await deletePost(postIdToDelete, token)
+      router.push('/')
+    } catch (err: any) {
+      console.error("Failed to delete post:", err)
+      setIsDeleting(false)
+      setShowDeleteConfirm(false)
+    }
   }
 
   const formatDate = (date: Date) =>
@@ -232,12 +241,12 @@ export default function PostPage() {
               This action cannot be undone. The post will be permanently removed.
             </p>
             <div className="flex gap-3 justify-end">
-              <Button variant="ghost" onClick={() => setShowDeleteConfirm(false)} style={{cursor: 'pointer'}}>
+              <Button variant="ghost" disabled={isDeleting} onClick={() => setShowDeleteConfirm(false)} style={{cursor: 'pointer'}}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={() => handleDelete(post.id.toString())} style={{cursor: 'pointer'}}>
+              <Button variant="destructive" disabled={isDeleting} onClick={() => handleDelete(post.id.toString())} style={{cursor: 'pointer'}}>
                 <Trash2 className="w-4 h-4 mr-2" />
-                Delete
+                {isDeleting ? 'Deleting...' : 'Delete'}
               </Button>
             </div>
           </div>

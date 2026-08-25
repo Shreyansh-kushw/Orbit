@@ -26,15 +26,15 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
     ? post.content.slice(0, MAX_PREVIEW_LENGTH) + '...'
     : post.content
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+  const formatDate = (date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date
     const now = new Date()
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
+    const diffInHours = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60))
 
     if (diffInHours < 1) return 'Just now'
     if (diffInHours < 24) return `${diffInHours}h ago`
     if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
   return (
@@ -63,7 +63,7 @@ export function PostCard({ post, showFullContent = false }: PostCardProps) {
               <span>·</span>
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {new Date(post.createdAt).toDateString()}
+                {formatDate(post.createdAt)}
               </span>
             </div>
           </div>

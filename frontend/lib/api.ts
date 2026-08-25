@@ -218,6 +218,60 @@ export async function uploadAvatar(userId: number, file: File): Promise<UserPubl
     return response.json()
 }
 
+export async function createPost(data: { title: string; content: string; tags?: string | null }): Promise<PostApiResponse> {
+    const token = Cookies.get('access_token')
+    if (!token) throw new Error("Not authenticated")
+
+    const response = await fetch(`${API_URL}/api/posts`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        const detail = errorData.detail
+        const message = typeof detail === 'string'
+            ? detail
+            : Array.isArray(detail)
+                ? detail[0]?.msg || "Validation error"
+                : "Failed to create post"
+        throw new Error(message)
+    }
+
+    return response.json()
+}
+
+export async function updatePost(postId: string | number, data: { title?: string; content?: string; tags?: string | null }): Promise<PostApiResponse> {
+    const token = Cookies.get('access_token')
+    if (!token) throw new Error("Not authenticated")
+
+    const response = await fetch(`${API_URL}/api/posts/${postId}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        const detail = errorData.detail
+        const message = typeof detail === 'string'
+            ? detail
+            : Array.isArray(detail)
+                ? detail[0]?.msg || "Validation error"
+                : "Failed to update post"
+        throw new Error(message)
+    }
+
+    return response.json()
+}
+
 export async function deletePost(post_id: string, token: string | undefined) {
     try {
         const response = await fetch(`${API_URL}/api/posts/${post_id}`, {

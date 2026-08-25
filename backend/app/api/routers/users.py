@@ -266,7 +266,7 @@ async def update_user(
     if user_update.email is not None:
         user.email = user_update.email.lower()
     if user_update.name is not None:
-        user.name = user_update.name.capitalize()
+        user.name = user_update.name.title() # Capitalizes the first letter of the words in the name
     if user_update.bio is not None:
         user.bio = user_update.bio
     if user_update.image_file is not None:
@@ -288,7 +288,7 @@ async def upload_avatar(
 
     if user_id != current_user.id:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not authorised to perform this action.",
         )
 
@@ -315,7 +315,6 @@ async def upload_avatar(
             os.remove(old_file)
 
     user.image_file = f"{filename}{file_extension}"
-    print(user.image_path)
     await db.commit()
     await db.refresh(user)
 

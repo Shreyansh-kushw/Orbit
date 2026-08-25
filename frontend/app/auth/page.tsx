@@ -17,13 +17,13 @@ const EXPIRE_MINS: number = parseInt(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 
 function AuthPageContent() {
 
   const searchParams = useSearchParams()
-  const [currentUser, setCurrentUSer] = useState(null)
-  // const rawUser = await getCurrentUser()
+  const [currentUser, setCurrentUser] = useState(null)
+  
   useEffect(() => {
     getCurrentUser().then((user) => {
-      setCurrentUSer(user)
+      setCurrentUser(user)
     })
-  })
+  }, [])
 
   const initialMode = searchParams.get('mode') === 'signup' ? 'signup' : 'login'
   const msg = searchParams.get('message')
@@ -48,30 +48,34 @@ function AuthPageContent() {
       setMessage(msg)
     }
   }, [msg])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isLoading) {
       return
     }
 
+    setError(null)
+    setMessage(null)
+
     // Sign up validation
-    if (mode == "signup") {
-      setIsLoading(true)
-      if (formData.password != formData.confirmPassword) {
-        setError("Both password do not match")
+    if (mode === "signup") {
+      if (formData.password !== formData.confirmPassword) {
+        setError("Both passwords do not match.")
         return
       }
 
       if (formData.password.length < 8) {
-        setError("Password should be atleast 8 characters long.")
+        setError("Password should be at least 8 characters long.")
         return
       }
 
       if (formData.username.includes(' ') || formData.username.includes('-')) {
         setError("Username cannot contain spaces or hyphens.")
-        setIsLoading(false)
         return
       }
+
+      setIsLoading(true)
 
       try {
         const response = await fetch(`${API_URL}/api/users`,
@@ -93,7 +97,7 @@ function AuthPageContent() {
 
         setIsLoading(false)
         if (!response.ok) {
-          const errorResponse = await response.json()
+          const errorResponse = await response.json().catch(() => ({}))
           const detail = errorResponse.detail
           const cleanError = typeof detail === 'string' 
             ? detail 
@@ -108,6 +112,7 @@ function AuthPageContent() {
         }
       }
       catch (error: unknown) {
+        setIsLoading(false)
         if (error instanceof Error) {
           setError(error.message)
         }
@@ -147,17 +152,16 @@ function AuthPageContent() {
         }
         else {
           setIsLoading(false)
-          const errorResponse = await response.json()
+          const errorResponse = await response.json().catch(() => ({}))
           const detail = errorResponse.detail
           const cleanError = typeof detail === 'string' 
             ? detail 
             : "Incorrect email or password"
           throw new Error(cleanError)
         }
-
-
       }
       catch (error: unknown) {
+        setIsLoading(false)
         if (error instanceof Error) {
           setError(error.message)
         }
@@ -167,12 +171,12 @@ function AuthPageContent() {
         return
       }
     }
-
-
   }
 
   const toggleMode = () => {
     setMode(mode === 'login' ? 'signup' : 'login')
+    setError(null)
+    setMessage(null)
     setFormData({ email: '', name: '', username: '', password: '', confirmPassword: '' })
   }
 

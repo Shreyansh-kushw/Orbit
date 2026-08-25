@@ -24,10 +24,7 @@ import { cn } from '@/lib/utils'
 import { getCurrentUser } from '@/lib/auth'
 import { User, Post } from '@/lib/schemas'
 import { mapUser, mapPost } from '@/lib/utils'
-import { getPostsByID } from '@/lib/api'
-import Cookies from 'js-cookie'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { getPostsByID, updatePost } from '@/lib/api'
 
 export default function EditPostPage() {
   const router = useRouter()
@@ -107,18 +104,16 @@ export default function EditPostPage() {
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)
-
-    const token = Cookies.get('access_token')
     
     // Only send changed fields
-    const updatedFields: any = {}
-    if (title !== initialData?.title) updatedFields.title = title
-    if (content !== initialData?.content) updatedFields.content = content
+    const updatedFields: { title?: string; content?: string; tags?: string | null } = {}
+    if (title.trim() !== initialData?.title) updatedFields.title = title.trim()
+    if (content.trim() !== initialData?.content) updatedFields.content = content.trim()
     
     const initialTagsStr = (initialData?.tags || []).sort().join(',')
     const currentTagsStr = [...tags].sort().join(',')
     if (initialTagsStr !== currentTagsStr) {
-      updatedFields.tags = tags.join(',')
+      updatedFields.tags = tags.length > 0 ? tags.join(',') : ''
     }
 
     if (Object.keys(updatedFields).length === 0) {
@@ -128,23 +123,10 @@ export default function EditPostPage() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/api/posts/${postId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(updatedFields)
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.detail || 'Failed to update post')
-      }
-
+      await updatePost(postId, updatedFields)
       router.push(`/post/${postId}`)
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || 'Failed to update post')
       setIsSubmitting(false)
     }
   }
@@ -229,13 +211,18 @@ export default function EditPostPage() {
                       "bg-secondary/30 border-border/50 focus:border-primary/50 h-12 text-lg pr-10",
                       !isEditingTitle && "opacity-70 cursor-not-allowed"
                     )}
-                    maxLength={200}
+                    maxLength={100}
                     required
                   />
                   {!isEditingTitle && (
                     <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   )}
                 </div>
+                {isEditingTitle && (
+                  <p className="text-xs text-muted-foreground text-right">
+                    {title.length}/100 characters
+                  </p>
+                )}
               </div>
 
               {/* Content */}

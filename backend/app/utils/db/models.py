@@ -22,7 +22,7 @@ class User(Base):
         index=True,
     )
     username: Mapped[str] = mapped_column(
-        String(30),
+        String(50),
         unique=True,
         nullable=False,
         index=True,
@@ -104,8 +104,8 @@ class Post(Base):
             "ix_posts_embedding", # name of the index
             "embedding", # name of the column whose index is this
             postgresql_using="hnsw", # the method to use for creating index
-            postgresql_ops="vector_cosine_ops", # the operator to use for comparing vectors
-            postgresql_ops={
+            postgresql_ops={"embedding": "vector_cosine_ops"}, # the operator to use for comparing vectors
+            postgresql_with={
                 "m" : 16, # number of neighbors for each node
                 "ef_construction": 64 # number of visited nodes during construction
             }

@@ -13,9 +13,7 @@ import { cn } from '@/lib/utils'
 import { getCurrentUser } from '@/lib/auth'
 import { User } from '@/lib/schemas'
 import { mapUser } from '@/lib/utils'
-import Cookies from 'js-cookie';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { createPost } from '@/lib/api'
 
 export default function CreatePostPage() {
   const router = useRouter()
@@ -26,7 +24,6 @@ export default function CreatePostPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isPreview, setIsPreview] = useState(false)
 
-  const [message, setMessage] = useState<string | null>(null);
   const [exception, setError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true)
 
@@ -69,47 +66,27 @@ export default function CreatePostPage() {
     if (!title.trim() || !content.trim()) return
 
     setIsSubmitting(true)
-    const token = Cookies.get('access_token')
-    // API call
+    setError(null)
+
     try {
-      const response = await fetch(`${API_URL}/api/posts`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify(
-            {
-              title: title,
-              content: content,
-              tags: tags.join(','),
-            }
-          )
-        }
-      );
+      await createPost({
+        title: title.trim(),
+        content: content.trim(),
+        tags: tags.length > 0 ? tags.join(',') : null,
+      })
 
-      if (!response.ok) {
-        const errorResponse = await response.json()
-        throw new Error(`Error: ${JSON.stringify(errorResponse.detail).replaceAll(`"`, ``)}`)
-      }
-      else {
-        const msg = `Post created successfully!`
-
-        // Redirect to home
-        router.push('/')
-      }
+      // Redirect to home
+      router.push('/')
     }
     catch (error: unknown) {
+      setIsSubmitting(false)
       if (error instanceof Error) {
         setError(error.message)
       }
       else {
-        setError(`An unexpected error occured: ${error}`)
+        setError(`An unexpected error occurred`)
       }
-      return
     }
-    setIsSubmitting(false)
   }
 
   const characterCount = content.length
@@ -160,6 +137,14 @@ export default function CreatePostPage() {
           </p>
         </div>
 
+        {/* Error Alert */}
+        {exception && (
+          <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-xl mb-6 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <p className="text-sm font-medium">{exception}</p>
+          </div>
+        )}
+
         {/* Form / Preview */}
         <div className="glass rounded-xl p-6">
           {!isPreview ? (
@@ -175,11 +160,11 @@ export default function CreatePostPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="bg-secondary/30 border-border/50 focus:border-primary/50 h-12 text-lg"
-                  maxLength={200}
+                  maxLength={100}
                   required
                 />
                 <p className="text-xs text-muted-foreground text-right">
-                  {title.length}/200 characters
+                  {title.length}/100 characters
                 </p>
               </div>
 

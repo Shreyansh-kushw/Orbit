@@ -80,7 +80,7 @@ async def get_posts(
             print(f"Error embedding keyword: {e}")
             keyword_filter = or_(
                 models.Post.title.icontains(keyword),
-                model.Post.content.icontains(keyword),
+                models.Post.content.icontains(keyword),
             )
             query = query.where(keyword_filter).order_by(models.Post.date_posted.desc())
             count_query = count_query.where(keyword_filter)
@@ -198,7 +198,16 @@ async def update_post(
     
     # Update embedding if title or content changed
     if post_data.title or post_data.content:
-        post.embedding = await asyncio.to_thread(embed_content, f"{post.title} {post.content}")
+        try:
+            post.embedding = await asyncio.to_thread(embed_content, f"{post.title} {post.content}")
+        
+        except Exception as e:
+            print(f"Error embedding post content: {e}")
+            post.embedding = None
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Error embedding post content, {}".format(e),
+            )
     
     if post_data.tags:
         post.tags = post_data.tags
