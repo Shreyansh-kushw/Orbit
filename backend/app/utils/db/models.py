@@ -109,7 +109,7 @@ class Post(Base):
                 "m" : 16, # number of neighbors for each node
                 "ef_construction": 64 # number of visited nodes during construction
             }
-        )
+        ),
     )
 
 # For vector indexes- there are generally two main methods -> HNSW or IVFFlat
